@@ -70,11 +70,11 @@ explicitly on a first run.
 | File | Contents |
 |---|---|
 | `SKILL.md` | Entry point: trigger, flow diagram, seam paragraph, critical facts, hard rules, quick start, reference directory |
-| `references/intake.md` | Reading the issue and the bridge metadata, the sufficiency matrix, asking the user how to close gaps, a capability that already exists |
+| `references/intake.md` | Reading the issue and the bridge metadata, the sufficiency matrix, asking the user how to close gaps, a capability that already exists, a feature it does not have |
 | `references/evidence.md` | The read-only production protocol, introspection, the report row, the reporter's timeline |
 | `references/root-causes.md` | Candidate causes with the check that confirms or kills each; the capped read and the record nobody owns in detail |
 | `references/fix-and-verify.md` | Sibling sweep, paging helper, guard test, the fail-then-pass repro, proving a rule below the screen, commit and push |
-| `references/reply.md` | The reply channel, the claim check, what goes in and stays out, templates after a fix, for a how-to, for a correction and when asking for details |
+| `references/reply.md` | The reply channel, the claim check, what goes in and stays out, templates after a fix, for a how-to, for a feature not built now, for a correction and when asking for details |
 | `references/adaptation.md` | The seam contract with the host, vocabulary, order of work, non-negotiables |
 | `references/provenance.md` | What the recorded sessions corrected, what was kept deliberately, what was added |
 | `evals/` | `prompts.md` with the prompts an operator types after installing, and one file per agent eval run |
@@ -114,7 +114,7 @@ the app's own way to run and drive it locally.
 | Building or repairing the reporting bridge itself | `in-app-bug-reports` |
 | Writing the commit message or splitting commits | `commit` |
 | Cutting a release after the fix | `bumpv` |
-| Triage of a whole backlog, outage response | Your incident and triage process |
+| Triage of a whole backlog, grooming a roadmap of requests, outage response | Your incident and triage process |
 
 ## Contributing
 

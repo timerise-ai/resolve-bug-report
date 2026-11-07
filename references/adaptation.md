@@ -18,6 +18,7 @@ rather than by asking.
 | Paging helper | `fetchAllRows` in [fix-and-verify.md](fix-and-verify.md) | Its own helper, if it has one | Cursor pagination; a SQL aggregate that returns one row |
 | Verify procedure | A project skill or Playwright against the dev server with seeded logins | Its launch steps, logins and selectors | A preview deployment with a test tenant |
 | Commit | Conventional Commits, `Fixes #N`, no attribution | Its convention, or its `commit` skill | |
+| Commercial terms | None: any request may be built | A feature freeze, a clause that extra work is quoted first, the labels for requests (`enhancement`, `out of scope`) | A public roadmap or a feature board the reply can point to |
 | Branch and deploy | A preview branch that merges to the default branch, then a production deploy | Which branch to push and what makes a fix live | Trunk-based: the push is the deploy, and the reply can say "now" |
 
 ## Vocabulary
@@ -41,6 +42,8 @@ The skill's examples use one booking product's names. Map them to the host's bef
 3. Find the audit table and how its actor maps to a member.
 4. Find the verify procedure and the seeded logins.
 5. Find the branch policy and what makes a fix live.
+6. Find the commercial terms with the tenant, in the operator's notes rather than the code: a freeze, a quote
+   clause, how requests are labelled.
 
 ## Non-negotiables, restated
 

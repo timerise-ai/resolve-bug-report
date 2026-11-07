@@ -13,7 +13,7 @@ Keep the two straight: the commands and code in `references/` (`gh`, `supabase d
 helper, the guard test) run in the **app** whose report is being resolved, not in this repository.
 
 The skill was written by the engineer who runs the reporting bridge of a multi-tenant booking product, from
-three recorded sessions. `references/provenance.md` is the rationale layer: what the sessions corrected, what
+five recorded sessions. `references/provenance.md` is the rationale layer: what the sessions corrected, what
 was kept deliberately and what was added without having run.
 
 ## Structure

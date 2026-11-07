@@ -21,6 +21,8 @@ Classify each hit. For a capped read the classes are:
 | Read that needs one record's rows | Defect if unfiltered | Filter by the record instead of paging everything |
 | Read filtered to one parent (one service, one member) | Safe, far below the cap | None |
 | Write (insert, delete) | Not a read | None |
+| A cap written on purpose (`.limit(500)` and a comment calling it a convenience) over a whole table in name order | Defect: it hides the same names | Page it, and rewrite the comment |
+| A control on the same screen that bounds a different field (the list filters by expiry, the export by issue date) | Not the same defect: wiring the filter through exports a different set than the one shown | None in this change; tell the user which field should win |
 
 A storefront or public path that uses the same rule as the screen in the report usually has the same defect,
 and the reporter never saw it. Fix it in the same change.
@@ -126,6 +128,24 @@ When the new tests sit in a file that already existed, a bare `git stash` takes 
 the fixed source paths only, `git stash push <fixed file> ...`, and check `git stash list` is empty again
 afterwards.
 
+A busy table (clients, products) has many single-row lookups the guard must not flag. Three changes keep it
+precise without an allowlist that grows with every file:
+
+| Change | Why |
+|---|---|
+| Strip `//` comments from the window, then cut it at the first `;` | A `;` inside a comment ends the statement early, and the lookup's narrowing filter falls outside it |
+| Widen the window to about 16 lines | A multi-line select with a comment per column pushes `.range(` past 8 lines |
+| Accept the narrowing shapes: `.range(`, `.in(`, `.eq("id"`, an exact key (`phone`, `email`), `.limit(1)`, `.maybeSingle(`, `.single(`, `head: true` | Each returns a handful of rows at most |
+
+What stays unmatched (an `.or()` built in a variable from two exact keys) goes into a set keyed by
+`file:line`, each with a comment saying why it stays small. Keyed by line on purpose: moving the read makes
+the test name it again. When several pickers read the same whole table, give them one helper that pages in the
+order they display, with the primary key as a tie-break so namesakes never repeat or drop between pages.
+
+When the fix changes what the screen shows, an existing test may encode the old behaviour (a fixture where a
+column holding a visit stays hidden). Change its expectations rather than the fixture, and name each changed
+test in the commit body and in the report to the user.
+
 ## When the fix is new behaviour
 
 A product decision usually means new behaviour rather than a corrected line, and a source guard has nothing to
@@ -160,6 +180,16 @@ skill, Playwright, a dev login) and this order:
    reproducing: go back to step 2, do not conclude the old code was fine.
 5. `git stash pop`, then delete the seeded records so the local dataset stays neutral.
 
+For a list ordered by name, seed filler names that sort first (`Aaa Repro 0001` onwards, past the cap) and one
+target that sorts last, then search the picker for the target as the reporter's role. For a visibility fix,
+change a seeded member's setting locally (a job function, an archived flag) and give it one record on the day
+on screen.
+
+A screen that downloads through `fetch` and saves a blob is read in two steps: wait for the response to learn
+the request's URL and query, then fetch that URL again with the page's own request context
+(`page.request.get(url)`, same cookies) to read the body. The body of the response the page consumed can come
+back empty, and an empty file looks like a filter that matched nothing.
+
 Two traps in seeding and cleaning up:
 
 - **Check that every seed insert succeeded before comparing.** An insert refused by a constraint (an
@@ -176,7 +206,8 @@ select table_name from information_schema.columns
 where table_schema = 'public' and column_name = 'sale_id';
 ```
 
-Delete those rows, then the record, then restore the seeded visits' status, in one transaction.
+Delete those rows, then the record, then restore the seeded visits' status, in one transaction. A seeded row
+you updated rather than inserted is cleanup too: put back the value you read before changing it.
 
 ## Proving a fix below the screen
 
@@ -245,9 +276,14 @@ comparison read the same data, and the repro looks like a fix that changed nothi
   `Fixes #<number>`.
 - `Fixes #N` closes the issue only when the commit reaches the default branch. On a preview or release
   branch the issue stays open until the merge; tell the user.
+- A defect fixed inside a report that stays open (a request noted for later) is committed with `Refs #N`, not
+  `Fixes #N`, so the merge does not close the request; label the issue as the host's request label.
 - No tool attribution in the message. Check `git log -1 --format=%B` before pushing.
 - Push only when the user asked for the issue to be resolved end to end, and only to the branch the host's
   policy names.
+- Merging into the default branch deploys to production: do it only when the user asks for that merge. A bare
+  "push" when the branch is already pushed most likely means it; say what is already pushed, list the commits
+  the merge would ship, and ask.
 
 ## Checklist
 
@@ -258,4 +294,6 @@ comparison read the same data, and the repro looks like a fix that changed nothi
 - [ ] Every seed insert confirmed; running app wrong on the old code, right on the new; seeded data removed
 - [ ] A rule below the screen proven against local data on both codes; a database function in a rolled-back
       transaction
-- [ ] Commit with `Fixes #N`, no attribution, pushed per the branch policy
+- [ ] Existing tests that encoded the old behaviour changed and named
+- [ ] Commit with `Fixes #N` (or `Refs #N` when the report stays open), no attribution, pushed per the branch
+      policy; the default branch merged only when asked

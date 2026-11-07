@@ -6,19 +6,21 @@ data confirms. Do not fix the first plausible candidate.
 
 ## The table
 
-The first row, the two rows after the filter row and the null-owner row are causes the flow confirmed on real
-reports. The rows between them were competing hypotheses in the first run, each eliminated by the check in its
-row; the last two are additions, marked as such.
+The first row, the two rows after the filter row, the null-owner row and the two rows after it are causes the
+flow confirmed on real reports. The rows between them were competing hypotheses in the first run, each
+eliminated by the check in its row; the last two are additions, marked as such.
 
 | Cause | Symptom | Check that confirms it | Check that kills it |
 |---|---|---|---|
-| Capped read | A list is wrong only for a large tenant: too short, or too wide where empty means everyone | Rows for the tenant on the table exceed the API cap, and the loader reads it in one request without `range` | Row count under the cap, or the loader pages |
+| Capped read | A list is wrong only for a large tenant: too short, or too wide where empty means everyone; in name order, only the first letters | Rows for the tenant on the table exceed the API cap, and the loader reads it in one request without `range` | Row count under the cap, or the loader pages |
 | Sync overwrites manual edits | A setting the reporter changed reverts or never takes effect | The audit trail shows a sync job writing the same rows after the manual write | No sync write after the manual one |
 | Narrower rule takes precedence | The broad setting is right, the screen still shows otherwise | A narrower scope (a variant, a location, a per-member override) has rows of its own | The narrower scope has no rows for the record |
 | Filter hides the record | The configured person or item never appears | The record fails a filter the screen applies: archived, inactive, lacking a role or function | The record passes every filter |
 | One action per record, the tenant thinks in groups | Several things that belong together are handled one by one: separate receipts, separate messages | The action's code takes one id; the timeline shows the same write repeated for records of one client or day | The action already takes a group, and the group was set |
 | An integration drops a relation | Records that belong together arrive unrelated; grouping logic never fires | The rows from the integration have an empty relation column (a group id) that native rows fill | The relation is filled on those rows |
 | A record for everyone is skipped by an owner match | One screen shows an entry that applies to all (a closure, a default, an unassigned slot), another path acts as if it were not there | The record's owner columns are null, and the other path matches `owner = <id>`, which null never equals | The path handles the null owner, or the record has an owner |
+| A view filter hides the container with what it holds | "X is not among the people, so I cannot settle Y": records assigned to someone vanish from a grid | A default-on filter on columns (people by job function, rooms by kind) drops a column without asking whether it holds records that day | The column stays whenever it holds a record |
+| A control ignores the screen's state | An export, total or print does not match what the screen shows | The control sends none of the screen's period or filter, and the server falls back to its own default window | The control passes the state and the server honours it for that dataset |
 | Stale cache (added) | A change shows after a reload or a deploy, not before | The screen's data comes from a cache the write does not invalidate | The screen reads fresh on every request |
 | Time zone (added) | Wrong only near midnight, or for one tenant in another zone | The stored instant is right and the rendered day is not | Times are right at noon |
 
@@ -66,6 +68,9 @@ The `explain` shows which index orders the page, which is what you need to build
 | A date or hour off by one | Time zone |
 | "separately instead of together" | One action per record, then the integration's relations |
 | "the whole salon", "for everyone", "nobody should be able to" | Records with no owner, and every path that matches by owner |
+| "only names starting with A", "cannot pick anyone else" | Capped read over a list ordered by name, then every picker on that table |
+| "X is missing from the people, so I cannot do Y" | Default-on view filters that hide a column, before the person's own settings |
+| "the export does not match", "the file has other dates" | The control's request: does it carry the screen's period and filters |
 
 ## The record nobody owns, in detail
 

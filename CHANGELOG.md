@@ -16,7 +16,30 @@ All notable changes to this skill are documented here. The format follows
   every path that matches busy time by owner.
 - Proving a rule below the screen in `references/fix-and-verify.md`: a throwaway loader test, a database
   function compared in a rolled-back transaction, stashing only the fixed paths, and the shell-variable trap.
-- Provenance entries 8 to 10, 16 and 19 from a third recorded session, and a fourth eval prompt.
+- A report that asks for a feature the app does not have: confirm the absence, list every reader of the field,
+  read the host's commercial terms and put the variants to the user, in `references/intake.md`; the template
+  for a feature not built now, the claim-check row for a trade-off the user names, and reading earlier replies
+  for the house tone, in `references/reply.md`; the commercial-terms seam in `references/adaptation.md`.
+- Provenance entries 8 to 10, 20 and 29 from a third recorded session, entries 11, 21 and 30 from a fourth,
+  entries 12 to 14 and 22 to 26 from a fifth, and a fourth, a fifth and a sixth eval prompt.
+- A how-to the user proposes is checked like any other, and the capability must let the reporter finish the
+  task they named, in `references/intake.md`; reading the screen a request names for a defect fixable under a
+  freeze.
+- Two confirmed causes in `references/root-causes.md`: a default-on view filter that hides a column with the
+  records it holds, and a control (an export) that ignores the screen's period; the capped read's name-order
+  signature and three new report signs.
+- In `references/fix-and-verify.md`: a cap written on purpose and a look-alike control on a different field in
+  the sweep table, the busy-table guard (comments stripped, wider window, narrowing shapes, a line-keyed set,
+  one shared helper), changing tests that encoded the old behaviour, seeding a name-ordered list and a
+  visibility fix, reading a download in two steps, restoring updated seed rows, `Refs #N` for a report that
+  stays open, and asking before merging into the default branch.
+- Three claim-check rows in `references/reply.md`: a label collapsed at the reporter's viewport, a toggle that
+  is not saved, and a view that shows the record but cannot act on it.
+
+### Changed
+
+- A single feature request filed through the bridge now stays in the flow up to the reply; only grooming a
+  roadmap of requests is sent to the backlog in "When NOT to use".
 
 ## [0.1.0] - 2026-11-07
 

@@ -94,12 +94,47 @@ how-to. Do not say so until the code says so, at the app version in the metadata
 | Every entry point to the capability: toolbar, row or column menu, shortcut, quick action, a dialog that offers it | The reply names the ones the reporter will find first; a single path is often the one they missed |
 | Every edge the reporter named: "after hours too", "the whole salon", "without clicking" | The capability can exist and still fail on exactly the edge they care about |
 | Every variant of the record: per person and for everyone, assigned and unassigned | A variant the app draws but another path ignores is a defect hiding inside a how-to (see [root-causes.md](root-causes.md)) |
+| The task they named, to its end: settle, send, print, not only see | A view that lists the record but cannot act on it is not the answer; a list whose rows only link elsewhere sends them to a dead end |
 | The labels, verbatim from source | The reply quotes buttons and menu items; a paraphrase sends them looking for a word that is not there |
 | Which element does what: the name, the arrow beside it, a right click | "Click the name" and "click the arrow next to the name" open different things |
 
 Then ask the user, with three options, the first recommended: reply with the how-to; reply and make a small
 improvement the report points at; read production first to tell a capability nobody found from one that
 failed when used. A report filed from an unrelated page through the assistant points to the first.
+
+A how-to the user proposes ("explain where the list mode is") is a hypothesis like any other. Run the same
+checks on it before drafting. When the place the user named shows the record but cannot finish the task, say
+so before writing a word to the reporter, name the path that does work, and look for why the reporter could
+not reach it: a default-on filter that hides the record together with its column is a defect, and the user
+then picks between fixing it with the how-to and the how-to alone.
+
+## When the report asks for a feature the app does not have
+
+A report can be a request: "can one service sit in two categories?" Nothing went wrong and there is nothing
+to point at, yet the reporter filed it where bugs go and is waiting for an answer. Do not drop it into the
+backlog without a word: the flow runs up to the reply, even if the code is never written.
+
+| Step | What it settles |
+|---|---|
+| Confirm the absence at the app version: the field, its form control, every entry point a how-to would use | That the answer is not a how-to; a single-choice select over a single foreign key is the usual proof |
+| List every reader of the field the feature would change: screens, public pages, rules, reports, integrations | The real cost and the trade-offs: a rule that picks one value per record turns ambiguous when a record may hold several |
+| Read the host's commercial terms: a feature freeze, a clause that work outside the contract is quoted first, the labels for requests | Whether "build it" is on the table now; these live in the host's notes, not in the code |
+| Write the variants, the narrow one among them | A narrow variant often keeps the rules that pay or bill on one value and widens only what is displayed |
+| Read the screen the request names for a defect: its export, totals and filters against what it shows | A control that ignores the screen's state (an export that ignores the period on screen) is a defect a freeze allows fixing; it goes in as a variant beside "noted for later" |
+
+Then ask the user, the recommended variant first:
+
+| Variant | When it is right |
+|---|---|
+| Reply that it is noted for later | A freeze or a quote clause is in force, or the list of readers is long; label the issue and keep it open |
+| Build the narrow variant | The request is cheap without touching the rules that pay or bill: one primary value, extra values for display |
+| Build it fully | The tenant needs the rules to follow too, and the user accepts deciding which value wins in each |
+| Read production first | Their data would change the answer, such as how their category tree is actually shaped |
+
+The user may add a consequence while you work, such as "it would mean removing the per-category commission
+rules". That is their product decision, not a claim the code can prove. Carry it into the reply in the
+screen's words, check that the screen and its label exist, and say in the report back to the user that the
+reasoning was theirs. See [reply.md](reply.md).
 
 ## Checklist
 
@@ -111,3 +146,5 @@ failed when used. A report filed from an unrelated page through the assistant po
 - [ ] If the cause is behaviour: the user asked to pick a variant, the existing workaround among them
 - [ ] If the capability exists: every entry point, every named edge and every record variant checked in
       the code before the user is asked
+- [ ] If it asks for something new: the absence confirmed, every reader of the field listed, the host's
+      commercial terms read, and the user asked to pick a variant

@@ -10,16 +10,17 @@ description: >
   an empty or thin description, (3) the user asks to check whether there is enough information before
   fixing, (4) the user asks to reply to the reporter once it is fixed, (5) the evidence shows the app
   working as built and the fix is a product decision, (6) the report asks for something the app already
-  has and the answer is a how-to, (7) a reply already sent was wrong and needs a correction, (8) the user
-  mentions: resolve issue, fix issue #,
-  tenant-report label, customer bug report, "check if you have everything you need", /reply, leave a reply
-  for the reporter, ask the reporter to confirm, audit log, production read only, supabase db query --remote
-  --read-only, PostgREST max_rows, 1000-row cap, "Fixes #", "settled separately instead of together",
-  "it already exists", "for the whole salon".
+  has and the answer is a how-to, (7) the report asks for a feature the app does not have and the reporter
+  needs an answer now, built or not, (8) a reply already sent was wrong and needs a correction, (9) the user
+  mentions: resolve issue, fix issue #, tenant-report label, customer bug report, "check if you have
+  everything you need", /reply, leave a reply for the reporter, ask the reporter to confirm, audit log,
+  production read only, supabase db query --remote --read-only, PostgREST max_rows, 1000-row cap, "Fixes #",
+  "settled separately instead of together", "it already exists", "for the whole salon", "can it be done",
+  feature request, feature freeze, out of scope, "only clients starting with A", "explain where the list is".
   Carries a sufficiency matrix, a read-only production protocol with the user's approval, a reporter
   timeline query, a root-cause table with the check that tells each cause apart, the variants to put to the
   user when the cause is behaviour, a guard test that fails on the old code, a claim check before any reply,
-  and reply templates for a fix, a how-to and a correction. Any git
+  and reply templates for a fix, a how-to, a feature not built now and a correction. Any git
   repository with the gh CLI and a Postgres backed multi-tenant app; the tracker, the reply channel,
   production access and the app's verify procedure are the seams. Not the bridge itself, not bulk triage,
   not outage response.
@@ -45,9 +46,9 @@ and a reply the reporter can act on.
 - **Building or repairing the reporting bridge** (outbox, webhook, `/reply` mirroring): `in-app-bug-reports`.
 - **Triage of many issues at once**, labelling or prioritising a backlog: this skill resolves one report.
 - **An outage or incident** affecting every tenant: incident response first, a report thread later.
-- **A pure feature request** with nothing reported as going wrong: the backlog. A report where the app does
-  what it was built to do and the tenant expected otherwise stays here; its fix is a product decision. So
-  does a request for something the app already has: its answer is a how-to.
+- **Grooming a roadmap** of feature requests: the backlog. A single request filed through the bridge stays
+  here, because the reporter is waiting for an answer: confirm the app lacks it, map what it would change,
+  let the user decide, reply. So does a report where the app works as built, and one for something it has.
 - **Writing the commit or cutting a release**: `commit` and `bumpv` own those steps; this skill calls them.
 
 ## Architecture
@@ -93,7 +94,8 @@ skill's contract. [adaptation.md](references/adaptation.md) has the table.
 8. **When the app does exactly what it was built to do, the fix is the user's product decision.** Lay out the
    variants, including a workaround the app already has, recommend one, and build what the user picks. When
    it already does what the reporter asks, check every entry point, every edge they named and every variant
-   of the record first: a variant the app draws but another path ignores is a defect inside the how-to.
+   of the record first: a variant the app draws but another path ignores is a defect inside the how-to. When
+   it lacks what they ask, list every reader of the field the feature would change before asking the user.
 
 ## Hard rules
 
@@ -142,12 +144,12 @@ skill's contract. [adaptation.md](references/adaptation.md) has the table.
 
 | Scenario | Trigger keywords | Reference |
 |---|---|---|
-| Reading the report, deciding if it is enough | issue view, empty body, no description, metadata table, page path, app version, sufficiency, missing information, product decision, variants, workaround, already exists, entry points, how-to | [intake.md](references/intake.md) |
+| Reading the report, deciding if it is enough | issue view, empty body, no description, metadata table, page path, app version, sufficiency, missing information, product decision, variants, workaround, already exists, entry points, how-to, feature request, new feature, readers of the field, feature freeze, out of scope, proposed how-to, finish the task, defect inside a request | [intake.md](references/intake.md) |
 | Reading production safely | read only, supabase db query --remote, audit_log, timeline, to_jsonb, information_schema, actor_id, attachments, untrusted data, permission denied, burst of writes, records behind the writes | [evidence.md](references/evidence.md) |
-| Naming the cause | wrong list, missing employee, everyone shown, max_rows, 1000 rows, truncated, fallback, sync overwrote, archived, filtered out, cache, separate receipts, one per record, portal import, missing group, whole salon, for everyone, null owner, salon-wide | [root-causes.md](references/root-causes.md) |
-| Fixing, testing, reproducing, committing | sibling sweep, guard test, fetchAllRows, range, repro, Playwright, git stash, Fixes #, default branch, push, new behaviour, pure module, client-supplied ids, exclusion constraint, cleanup, git stash push, server loader, database function, rolled-back transaction | [fix-and-verify.md](references/fix-and-verify.md) |
-| Answering the reporter | /reply, reply template, confirm, plain language, reporter's language, ask for details, behaviour change, opt out, check every claim, how-to, correction, wrong reply | [reply.md](references/reply.md) |
-| Fitting the flow to the host | Linear, Jira, GitHub, psql, replica, verify skill, branch policy, rename | [adaptation.md](references/adaptation.md) |
+| Naming the cause | wrong list, missing employee, everyone shown, max_rows, 1000 rows, truncated, fallback, sync overwrote, archived, filtered out, cache, separate receipts, one per record, portal import, missing group, whole salon, for everyone, null owner, salon-wide, name order, only A, default filter, hidden column, export ignores the period | [root-causes.md](references/root-causes.md) |
+| Fixing, testing, reproducing, committing | sibling sweep, guard test, fetchAllRows, range, repro, Playwright, git stash, Fixes #, default branch, push, new behaviour, pure module, client-supplied ids, exclusion constraint, cleanup, git stash push, server loader, database function, rolled-back transaction, Refs #, merge to main, limit on purpose, tests that encode old behaviour, download body empty | [fix-and-verify.md](references/fix-and-verify.md) |
+| Answering the reporter | /reply, reply template, confirm, plain language, reporter's language, ask for details, behaviour change, opt out, check every claim, how-to, correction, wrong reply, not now, noted for later, quote, trade-off, earlier replies, collapsed label, toggle not saved, view that cannot act | [reply.md](references/reply.md) |
+| Fitting the flow to the host | Linear, Jira, GitHub, psql, replica, verify skill, branch policy, rename, commercial terms, feature freeze, labels | [adaptation.md](references/adaptation.md) |
 | Why the flow is shaped this way | provenance, kept deliberately, added | [provenance.md](references/provenance.md) |
 
 Part of the [Timerise Skills](https://github.com/timerise-ai/skills) index, which lists the sibling skills.

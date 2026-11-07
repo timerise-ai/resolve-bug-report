@@ -1,0 +1,68 @@
+# Root causes: naming the cause the data distinguishes
+
+A report names a symptom. Several causes produce the same symptom, and each leaves a different trace in the
+data. Write the candidates down with the check that tells them apart, run the checks, and keep the one the
+data confirms. Do not fix the first plausible candidate.
+
+## The table
+
+The first row is the cause this skill's flow was proven on. The others were the competing hypotheses in that
+same run, each eliminated by the check in its row; the last two are additions, marked as such.
+
+| Cause | Symptom | Check that confirms it | Check that kills it |
+|---|---|---|---|
+| Capped read | A list is wrong only for a large tenant: too short, or too wide where empty means everyone | Rows for the tenant on the table exceed the API cap, and the loader reads it in one request without `range` | Row count under the cap, or the loader pages |
+| Sync overwrites manual edits | A setting the reporter changed reverts or never takes effect | The audit trail shows a sync job writing the same rows after the manual write | No sync write after the manual one |
+| Narrower rule takes precedence | The broad setting is right, the screen still shows otherwise | A narrower scope (a variant, a location, a per-member override) has rows of its own | The narrower scope has no rows for the record |
+| Filter hides the record | The configured person or item never appears | The record fails a filter the screen applies: archived, inactive, lacking a role or function | The record passes every filter |
+| Stale cache (added) | A change shows after a reload or a deploy, not before | The screen's data comes from a cache the write does not invalidate | The screen reads fresh on every request |
+| Time zone (added) | Wrong only near midnight, or for one tenant in another zone | The stored instant is right and the rendered day is not | Times are right at noon |
+
+## The capped read, in detail
+
+PostgREST, which Supabase's REST API is, answers any request with at most `max_rows` rows, 1000 by default,
+and returns them with status 200 and no error. A loader that reads a whole tenant's table in one request
+works until the tenant crosses the cap, then reads a prefix of it.
+
+Two things make it hard to see:
+
+- **The prefix is not "the oldest rows".** Under row level security the planner often answers with an index
+  scan on the tenant and another column, so which rows survive depends on that index, not on insertion order.
+  The same data can be complete for one record and empty for another.
+- **A fallback amplifies it.** Where "no rows for this record" means "no restriction", a record whose rows
+  all fell past the cap shows everyone. Where it means "nobody", it shows no one. Either looks like a
+  configuration error to the tenant.
+
+Confirm it with three facts: the tenant's row count on the table, the loader's query (one request, no
+`range`, no filter that keeps it under the cap), and, ideally, the record from the report missing from the
+first page under the reporter's role.
+
+```sql
+-- run read only, or locally with the reporter's claims: is the record in the first page?
+begin;
+set local role authenticated;
+select set_config('request.jwt.claims', '{"sub":"<auth user id>","role":"authenticated"}', true);
+select count(*) filter (where service_id = '<record id>')
+from (select service_id from employee_services limit 1000) first_page;
+explain select service_id, employee_id, variant_id from employee_services limit 1000;
+rollback;
+```
+
+The `explain` shows which index orders the page, which is what you need to build a local reproduction in
+[fix-and-verify.md](fix-and-verify.md).
+
+## Signs that point to a cause before any query
+
+| In the report | Look first at |
+|---|---|
+| "wrong", "not all", "everyone" in a list | Capped read, then filters |
+| "I changed it and it is still wrong" | Narrower rule, sync overwrite, cache |
+| "since yesterday" | Commits to the loader at the app version, recent data jobs |
+| Only one tenant reports it | Scale (capped read), that tenant's integrations |
+| A date or hour off by one | Time zone |
+
+## Checklist
+
+- [ ] Two or more candidates written down, each with its confirming and killing check
+- [ ] Every check run; the cause kept is the one the data confirms
+- [ ] For a capped read: row count, the loader's query, and the record's absence from the first page

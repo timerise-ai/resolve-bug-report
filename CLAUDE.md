@@ -12,15 +12,15 @@ sibling sweep, fail-then-pass proof, commit, and a reply to the reporter.
 Keep the two straight: the commands and code in `references/` (`gh`, `supabase db query`, SQL, the paging
 helper, the guard test) run in the **app** whose report is being resolved, not in this repository.
 
-The skill was written by the engineer who runs the reporting bridge of a multi-tenant booking product, from a
-recorded session. `references/provenance.md` is the rationale layer: what the session corrected, what was kept
-deliberately and what was added without having run.
+The skill was written by the engineer who runs the reporting bridge of a multi-tenant booking product, from
+two recorded sessions. `references/provenance.md` is the rationale layer: what the sessions corrected, what
+was kept deliberately and what was added without having run.
 
 ## Structure
 
 - `SKILL.md`: entry point, loaded whole on every activation, so it stays between 130 and 160 lines, the
   closing index line aside. Frontmatter `description` is the trigger surface; the body carries the flow
-  diagram and the seam paragraph that points to `adaptation.md`, seven critical facts, six hard rules, the
+  diagram and the seam paragraph that points to `adaptation.md`, eight critical facts, six hard rules, the
   quick start, the reference directory and the closing index line.
 - `README.md`: the human-facing front door, in the section order of the index's STANDARD.md.
 - `references/intake.md`, `evidence.md`, `root-causes.md`, `fix-and-verify.md`, `reply.md`, `adaptation.md`,

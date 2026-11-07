@@ -65,6 +65,24 @@ produces the wrong-looking result, and write down two or three hypotheses, each 
 would confirm or kill it. The user decides better with those in front of them, and the question carries
 them.
 
+## When the cause is behaviour, not a defect
+
+Sometimes the evidence shows the app doing exactly what it was built to do, and the tenant expecting
+something else: a payment screen that settles one visit while the tenant thinks of several treatments in one
+sitting as one visit. Nothing is broken, so there is no single correct fix, and choosing the design is the
+user's call, not yours. Ask once the cause is confirmed, with the variants laid out:
+
+| Variant | Typical shape | Cost |
+|---|---|---|
+| Change the behaviour where the reporter was | The screen in the report does what they expected | The biggest change, on the path people use |
+| Route to a screen that already does it | A notice and a link that opens the other screen prefilled | Smaller; one more step for the user |
+| Reply with the existing workaround | No code; the reply explains where the app already does it | Cheapest; the friction stays |
+| Fix it upstream | The integration or import carries the missing relation | Often the cleanest data, often the slowest to ship |
+
+Look for the workaround before asking. A capability that exists on another screen, unreachable from the one
+in the report, is both a variant and evidence for the recommendation. Recommend one variant and say why; the
+user picks.
+
 ## Checklist
 
 - [ ] Issue, comments and metadata read; app version noted
@@ -72,3 +90,4 @@ them.
 - [ ] Sufficiency matrix filled; every gap named
 - [ ] Two or three hypotheses, each with the check that distinguishes it
 - [ ] If gaps remain: the user asked, with the three options and a recommendation
+- [ ] If the cause is behaviour: the user asked to pick a variant, the existing workaround among them

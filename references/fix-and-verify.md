@@ -122,6 +122,24 @@ describe("employee_services reads", () => {
 in place, which is exactly what you need: stash, run the test, read the offenders it lists (they must be the
 lines you fixed), `git stash pop`, run it again green. Then run the whole suite and the linter.
 
+## When the fix is new behaviour
+
+A product decision usually means new behaviour rather than a corrected line, and a source guard has nothing to
+hold. Put the rule in a pure module and test that instead:
+
+| Piece | Where | Why |
+|---|---|---|
+| Which records join the action (same client, same day) | A pure function, unit tested | The browser and the server choose the same set |
+| Whether the extra records may join (same payer, not paid, not cancelled, priced) | A pure function returning a refusal message or null, unit tested | The rule is tested without mocking the database client |
+| Reading the rows and refusing | The server action, calling the function | Ids arrive from the browser and are never trusted |
+
+The server holds each extra record to the same rules as the main one, plus the rule that joins them (one
+receipt, one payer), and refuses a requested id that did not come back from the read: under row level security
+another tenant's id simply returns nothing. A test file for a module that did not exist fails on the old code
+by construction; the running app is where fail then pass is shown.
+
+Commit new behaviour as `feat`, a corrected one as `fix`; both carry `Fixes #<number>`.
+
 ## Reproduce in the running app
 
 The guard proves the code; the repro proves the reporter's screen. Use the host's verify procedure (a project
@@ -138,6 +156,24 @@ skill, Playwright, a dev login) and this order:
    reproducing: go back to step 2, do not conclude the old code was fine.
 5. `git stash pop`, then delete the seeded records so the local dataset stays neutral.
 
+Two traps in seeding and cleaning up:
+
+- **Check that every seed insert succeeded before comparing.** An insert refused by a constraint (an
+  exclusion constraint on overlapping bookings of one member is common) leaves the record missing, the old and
+  new code then show the same screen, and the comparison proves nothing. Read the insert's output; pick a free
+  slot and insert again.
+- **Prefer a repro that does not submit on the old code.** Showing the old screen is enough; submitting
+  creates rows in several tables. When the new code must submit to prove the result (one receipt with two
+  lines), list what references the record before deleting it:
+
+```sql
+-- run locally: every table with a column pointing at a sale
+select table_name from information_schema.columns
+where table_schema = 'public' and column_name = 'sale_id';
+```
+
+Delete those rows, then the record, then restore the seeded visits' status, in one transaction.
+
 ## Commit and push
 
 - Stage the changed files by path; one commit for the fix, its siblings and the guard.
@@ -153,7 +189,8 @@ skill, Playwright, a dev login) and this order:
 ## Checklist
 
 - [ ] Every sibling found and classified; every defect fixed in one change
-- [ ] Guard test fails on the old code with exactly the fixed lines, passes on the new
+- [ ] Guard test fails on the old code with exactly the fixed lines, passes on the new; for new behaviour,
+      the rule in a pure module with unit tests, and the server re-checking every client-supplied id
 - [ ] Full suite and linter green
-- [ ] Running app: wrong on the old code, right on the new; seeded data removed
+- [ ] Every seed insert confirmed; running app wrong on the old code, right on the new; seeded data removed
 - [ ] Commit with `Fixes #N`, no attribution, pushed per the branch policy

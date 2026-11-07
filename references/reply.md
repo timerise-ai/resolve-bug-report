@@ -53,6 +53,27 @@ Please check after the update, for example on <the record they reported>, and co
 result>. If something is still not right, send us <the record's name and what should appear>.
 ```
 
+## Template, after a behaviour change
+
+When the fix changed how a screen works, the reporter has to recognise the new behaviour and know how to step
+out of it. Describe it in the order they will meet it, and say that past records need no correction when that
+is true.
+
+```text
+/reply Hello, thank you for the report!
+
+We checked <what they did, on which day>. <What the screen did, in their terms, and why it led to what they
+saw.>
+
+We changed it. When you <the action they take>, the screen now <the new behaviour, in the order they meet
+it>. If <the case where they want the old behaviour>, <how to opt out, for example untick it>.
+
+It will work after the next app update. <Past records do not need correcting, when true.>
+
+Please check after the update, on <the next case like theirs>, and confirm it works the way you expected. If
+it should work differently, tell us briefly how.
+```
+
 ## Template, when the evidence did not settle it
 
 Send this only when the user chose to ask the reporter.
@@ -79,5 +100,6 @@ the deploy that makes the fix live, and the issue closing when the commit reache
 - [ ] Prefix on the first line; posted through the bridge's channel
 - [ ] Reporter's language and form of address
 - [ ] Cause in their terms, scope, when it is live, nothing to redo, a request to confirm
+- [ ] For a behaviour change: the new behaviour in the order they meet it, and how to opt out
 - [ ] No internals, no other tenant's data
 - [ ] The user told the URL and what is still pending

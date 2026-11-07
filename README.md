@@ -76,7 +76,7 @@ explicitly on a first run.
 | `references/fix-and-verify.md` | Sibling sweep, paging helper, guard test, the fail-then-pass repro, commit and push |
 | `references/reply.md` | The reply channel, what goes in and stays out, templates after a fix and when asking for details |
 | `references/adaptation.md` | The seam contract with the host, vocabulary, order of work, non-negotiables |
-| `references/provenance.md` | What the recorded session corrected, what was kept deliberately, what was added |
+| `references/provenance.md` | What the recorded sessions corrected, what was kept deliberately, what was added |
 | `evals/` | `prompts.md` with the prompts an operator types after installing, and one file per agent eval run |
 | `.github/workflows/agent-eval.yml` | The caller of the index's agent eval workflow, run on every published release |
 
@@ -119,12 +119,12 @@ the app's own way to run and drive it locally.
 
 Issues and pull requests are welcome here. This repository is markdown only; the TypeScript blocks in the
 references are written to pass `strict` and `noUncheckedIndexedAccess`, and the SQL and shell blocks are the
-forms the recorded session ran. If you change a factual claim about a CLI, PostgREST or a tracker, say how you
-verified it: against the tool's own help, its documentation, or a reproduction.
+forms the recorded sessions ran. If you change a factual claim about a CLI, PostgREST or a tracker, say how
+you verified it: against the tool's own help, its documentation, or a reproduction.
 
 Adding, removing or renaming a file in `references/` means updating the quick start and the reference
 directory table in `SKILL.md`, the file table above, and any relative cross-links. `references/provenance.md`
-is the ledger that must stay truthful: anything the recorded session did not exercise is marked as added; add
+is the ledger that must stay truthful: anything the recorded sessions did not exercise is marked as added; add
 an entry for anything you change. Commits follow Conventional Commits and releases follow
 [STANDARD.md](https://github.com/timerise-ai/skills/blob/main/STANDARD.md) in the index; `CLAUDE.md` carries
 the full editing conventions.

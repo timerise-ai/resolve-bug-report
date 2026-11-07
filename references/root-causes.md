@@ -6,8 +6,9 @@ data confirms. Do not fix the first plausible candidate.
 
 ## The table
 
-The first row is the cause this skill's flow was proven on. The others were the competing hypotheses in that
-same run, each eliminated by the check in its row; the last two are additions, marked as such.
+The first row and the two rows after the filter row are causes the flow confirmed on real reports. The rows
+between them were competing hypotheses in the first run, each eliminated by the check in its row; the last
+two are additions, marked as such.
 
 | Cause | Symptom | Check that confirms it | Check that kills it |
 |---|---|---|---|
@@ -15,6 +16,8 @@ same run, each eliminated by the check in its row; the last two are additions, m
 | Sync overwrites manual edits | A setting the reporter changed reverts or never takes effect | The audit trail shows a sync job writing the same rows after the manual write | No sync write after the manual one |
 | Narrower rule takes precedence | The broad setting is right, the screen still shows otherwise | A narrower scope (a variant, a location, a per-member override) has rows of its own | The narrower scope has no rows for the record |
 | Filter hides the record | The configured person or item never appears | The record fails a filter the screen applies: archived, inactive, lacking a role or function | The record passes every filter |
+| One action per record, the tenant thinks in groups | Several things that belong together are handled one by one: separate receipts, separate messages | The action's code takes one id; the timeline shows the same write repeated for records of one client or day | The action already takes a group, and the group was set |
+| An integration drops a relation | Records that belong together arrive unrelated; grouping logic never fires | The rows from the integration have an empty relation column (a group id) that native rows fill | The relation is filled on those rows |
 | Stale cache (added) | A change shows after a reload or a deploy, not before | The screen's data comes from a cache the write does not invalidate | The screen reads fresh on every request |
 | Time zone (added) | Wrong only near midnight, or for one tenant in another zone | The stored instant is right and the rendered day is not | Times are right at noon |
 
@@ -60,9 +63,12 @@ The `explain` shows which index orders the page, which is what you need to build
 | "since yesterday" | Commits to the loader at the app version, recent data jobs |
 | Only one tenant reports it | Scale (capped read), that tenant's integrations |
 | A date or hour off by one | Time zone |
+| "separately instead of together" | One action per record, then the integration's relations |
 
 ## Checklist
 
 - [ ] Two or more candidates written down, each with its confirming and killing check
 - [ ] Every check run; the cause kept is the one the data confirms
 - [ ] For a capped read: row count, the loader's query, and the record's absence from the first page
+- [ ] If the cause is behaviour the app was built with: the user asked to pick a variant
+      ([intake.md](intake.md))

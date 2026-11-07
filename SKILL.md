@@ -117,7 +117,8 @@ skill's contract. [adaptation.md](references/adaptation.md) has the table.
 3. With approval, read production: the report row, attachments, the reporter's timeline, the records it
    names. [evidence.md](references/evidence.md)
 4. Match the evidence against the root-cause table and pick the cause the data distinguishes; if it is
-   behaviour the app was built with, ask the user to pick a variant. [root-causes.md](references/root-causes.md)
+   behaviour the app was built with, ask the user to pick a variant.
+   [root-causes.md](references/root-causes.md)
 5. Fix it, sweep for siblings, add the guard test, run the suite and the linter.
    [fix-and-verify.md](references/fix-and-verify.md)
 6. Reproduce in the running app on the old code and on the new; clean up the test data.

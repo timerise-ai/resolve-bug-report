@@ -9,13 +9,17 @@ description: >
   (1) the user hands over an issue number or URL of a report a customer filed, (2) a report has a title and
   an empty or thin description, (3) the user asks to check whether there is enough information before
   fixing, (4) the user asks to reply to the reporter once it is fixed, (5) the evidence shows the app
-  working as built and the fix is a product decision, (6) the user mentions: resolve issue, fix issue #,
+  working as built and the fix is a product decision, (6) the report asks for something the app already
+  has and the answer is a how-to, (7) a reply already sent was wrong and needs a correction, (8) the user
+  mentions: resolve issue, fix issue #,
   tenant-report label, customer bug report, "check if you have everything you need", /reply, leave a reply
   for the reporter, ask the reporter to confirm, audit log, production read only, supabase db query --remote
-  --read-only, PostgREST max_rows, 1000-row cap, "Fixes #", "settled separately instead of together".
+  --read-only, PostgREST max_rows, 1000-row cap, "Fixes #", "settled separately instead of together",
+  "it already exists", "for the whole salon".
   Carries a sufficiency matrix, a read-only production protocol with the user's approval, a reporter
   timeline query, a root-cause table with the check that tells each cause apart, the variants to put to the
-  user when the cause is behaviour, a guard test that fails on the old code, and a reply template. Any git
+  user when the cause is behaviour, a guard test that fails on the old code, a claim check before any reply,
+  and reply templates for a fix, a how-to and a correction. Any git
   repository with the gh CLI and a Postgres backed multi-tenant app; the tracker, the reply channel,
   production access and the app's verify procedure are the seams. Not the bridge itself, not bulk triage,
   not outage response.
@@ -42,7 +46,8 @@ and a reply the reporter can act on.
 - **Triage of many issues at once**, labelling or prioritising a backlog: this skill resolves one report.
 - **An outage or incident** affecting every tenant: incident response first, a report thread later.
 - **A pure feature request** with nothing reported as going wrong: the backlog. A report where the app does
-  what it was built to do and the tenant expected otherwise stays here; its fix is a product decision.
+  what it was built to do and the tenant expected otherwise stays here; its fix is a product decision. So
+  does a request for something the app already has: its answer is a how-to.
 - **Writing the commit or cutting a release**: `commit` and `bumpv` own those steps; this skill calls them.
 
 ## Architecture
@@ -86,7 +91,9 @@ skill's contract. [adaptation.md](references/adaptation.md) has the table.
 7. **A closing keyword closes the issue only when the commit reaches the default branch**, and the reporter
    sees the fix only after the production deploy; the reply says so.
 8. **When the app does exactly what it was built to do, the fix is the user's product decision.** Lay out the
-   variants, including a workaround the app already has, recommend one, and build what the user picks.
+   variants, including a workaround the app already has, recommend one, and build what the user picks. When
+   it already does what the reporter asks, check every entry point, every edge they named and every variant
+   of the record first: a variant the app draws but another path ignores is a defect inside the how-to.
 
 ## Hard rules
 
@@ -103,7 +110,8 @@ skill's contract. [adaptation.md](references/adaptation.md) has the table.
 > result before and the right one after.
 
 > **Reply only through the bridge's channel, in the reporter's language, without internals or other
-> tenants' data, and ask for confirmation.**
+> tenants' data, with every claim checked against the code, and ask for confirmation.** A wrong reply is
+> corrected by a new one.
 
 > **Outward acts only as asked.** Push and reply when the user asked for them; commits carry no tool
 > attribution.
@@ -125,7 +133,8 @@ skill's contract. [adaptation.md](references/adaptation.md) has the table.
    [fix-and-verify.md](references/fix-and-verify.md)
 7. Commit with the closing keyword and push per the branch policy.
    [fix-and-verify.md](references/fix-and-verify.md)
-8. Post the reply through the bridge and report back to the user. [reply.md](references/reply.md)
+8. List the reply's claims and trace each to the code, then post it through the bridge and report back to
+   the user. [reply.md](references/reply.md)
 9. Fit any of this to the host first if it differs from the defaults.
    [adaptation.md](references/adaptation.md)
 
@@ -133,11 +142,11 @@ skill's contract. [adaptation.md](references/adaptation.md) has the table.
 
 | Scenario | Trigger keywords | Reference |
 |---|---|---|
-| Reading the report, deciding if it is enough | issue view, empty body, no description, metadata table, page path, app version, sufficiency, missing information, product decision, variants, workaround | [intake.md](references/intake.md) |
+| Reading the report, deciding if it is enough | issue view, empty body, no description, metadata table, page path, app version, sufficiency, missing information, product decision, variants, workaround, already exists, entry points, how-to | [intake.md](references/intake.md) |
 | Reading production safely | read only, supabase db query --remote, audit_log, timeline, to_jsonb, information_schema, actor_id, attachments, untrusted data, permission denied, burst of writes, records behind the writes | [evidence.md](references/evidence.md) |
-| Naming the cause | wrong list, missing employee, everyone shown, max_rows, 1000 rows, truncated, fallback, sync overwrote, archived, filtered out, cache, separate receipts, one per record, portal import, missing group | [root-causes.md](references/root-causes.md) |
-| Fixing, testing, reproducing, committing | sibling sweep, guard test, fetchAllRows, range, repro, Playwright, git stash, Fixes #, default branch, push, new behaviour, pure module, client-supplied ids, exclusion constraint, cleanup | [fix-and-verify.md](references/fix-and-verify.md) |
-| Answering the reporter | /reply, reply template, confirm, plain language, reporter's language, ask for details, behaviour change, opt out | [reply.md](references/reply.md) |
+| Naming the cause | wrong list, missing employee, everyone shown, max_rows, 1000 rows, truncated, fallback, sync overwrote, archived, filtered out, cache, separate receipts, one per record, portal import, missing group, whole salon, for everyone, null owner, salon-wide | [root-causes.md](references/root-causes.md) |
+| Fixing, testing, reproducing, committing | sibling sweep, guard test, fetchAllRows, range, repro, Playwright, git stash, Fixes #, default branch, push, new behaviour, pure module, client-supplied ids, exclusion constraint, cleanup, git stash push, server loader, database function, rolled-back transaction | [fix-and-verify.md](references/fix-and-verify.md) |
+| Answering the reporter | /reply, reply template, confirm, plain language, reporter's language, ask for details, behaviour change, opt out, check every claim, how-to, correction, wrong reply | [reply.md](references/reply.md) |
 | Fitting the flow to the host | Linear, Jira, GitHub, psql, replica, verify skill, branch policy, rename | [adaptation.md](references/adaptation.md) |
 | Why the flow is shaped this way | provenance, kept deliberately, added | [provenance.md](references/provenance.md) |
 

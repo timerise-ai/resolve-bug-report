@@ -6,9 +6,9 @@ data confirms. Do not fix the first plausible candidate.
 
 ## The table
 
-The first row and the two rows after the filter row are causes the flow confirmed on real reports. The rows
-between them were competing hypotheses in the first run, each eliminated by the check in its row; the last
-two are additions, marked as such.
+The first row, the two rows after the filter row and the null-owner row are causes the flow confirmed on real
+reports. The rows between them were competing hypotheses in the first run, each eliminated by the check in its
+row; the last two are additions, marked as such.
 
 | Cause | Symptom | Check that confirms it | Check that kills it |
 |---|---|---|---|
@@ -18,6 +18,7 @@ two are additions, marked as such.
 | Filter hides the record | The configured person or item never appears | The record fails a filter the screen applies: archived, inactive, lacking a role or function | The record passes every filter |
 | One action per record, the tenant thinks in groups | Several things that belong together are handled one by one: separate receipts, separate messages | The action's code takes one id; the timeline shows the same write repeated for records of one client or day | The action already takes a group, and the group was set |
 | An integration drops a relation | Records that belong together arrive unrelated; grouping logic never fires | The rows from the integration have an empty relation column (a group id) that native rows fill | The relation is filled on those rows |
+| A record for everyone is skipped by an owner match | One screen shows an entry that applies to all (a closure, a default, an unassigned slot), another path acts as if it were not there | The record's owner columns are null, and the other path matches `owner = <id>`, which null never equals | The path handles the null owner, or the record has an owner |
 | Stale cache (added) | A change shows after a reload or a deploy, not before | The screen's data comes from a cache the write does not invalidate | The screen reads fresh on every request |
 | Time zone (added) | Wrong only near midnight, or for one tenant in another zone | The stored instant is right and the rendered day is not | Times are right at noon |
 
@@ -64,11 +65,28 @@ The `explain` shows which index orders the page, which is what you need to build
 | Only one tenant reports it | Scale (capped read), that tenant's integrations |
 | A date or hour off by one | Time zone |
 | "separately instead of together" | One action per record, then the integration's relations |
+| "the whole salon", "for everyone", "nobody should be able to" | Records with no owner, and every path that matches by owner |
+
+## The record nobody owns, in detail
+
+A tenant-wide entry is often stored as a row whose owner columns (person, room) are null: a closure for the
+whole business, a default, a hold. The screen that draws it fans it across every column, so it looks right.
+Every other path that asks "is this person busy" matches on the owner and silently skips it: the public
+booking engine, the overlap check, a cart that books several people at once, an assistant's free-slot tool.
+
+Sweep for it by the question, not the table: every function that decides availability or conflict, and
+whether it handles a row with no owner. Two traps:
+
+- **A database exclusion constraint does not cover it.** An overlap constraint keyed on the owner treats null
+  as distinct from everything, so the row collides with nothing.
+- **Not every ownerless row means everyone.** An unassigned visit is waiting for an owner, not closing the
+  business. Name the kinds that mean "everyone" in one pure function and test both sides of it.
 
 ## Checklist
 
 - [ ] Two or more candidates written down, each with its confirming and killing check
 - [ ] Every check run; the cause kept is the one the data confirms
 - [ ] For a capped read: row count, the loader's query, and the record's absence from the first page
+- [ ] For a record nobody owns: every availability and conflict path checked for the null owner
 - [ ] If the cause is behaviour the app was built with: the user asked to pick a variant
       ([intake.md](intake.md))

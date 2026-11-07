@@ -70,11 +70,11 @@ explicitly on a first run.
 | File | Contents |
 |---|---|
 | `SKILL.md` | Entry point: trigger, flow diagram, seam paragraph, critical facts, hard rules, quick start, reference directory |
-| `references/intake.md` | Reading the issue and the bridge metadata, the sufficiency matrix, asking the user how to close gaps |
+| `references/intake.md` | Reading the issue and the bridge metadata, the sufficiency matrix, asking the user how to close gaps, a capability that already exists |
 | `references/evidence.md` | The read-only production protocol, introspection, the report row, the reporter's timeline |
-| `references/root-causes.md` | Candidate causes with the check that confirms or kills each; the capped read in detail |
-| `references/fix-and-verify.md` | Sibling sweep, paging helper, guard test, the fail-then-pass repro, commit and push |
-| `references/reply.md` | The reply channel, what goes in and stays out, templates after a fix and when asking for details |
+| `references/root-causes.md` | Candidate causes with the check that confirms or kills each; the capped read and the record nobody owns in detail |
+| `references/fix-and-verify.md` | Sibling sweep, paging helper, guard test, the fail-then-pass repro, proving a rule below the screen, commit and push |
+| `references/reply.md` | The reply channel, the claim check, what goes in and stays out, templates after a fix, for a how-to, for a correction and when asking for details |
 | `references/adaptation.md` | The seam contract with the host, vocabulary, order of work, non-negotiables |
 | `references/provenance.md` | What the recorded sessions corrected, what was kept deliberately, what was added |
 | `evals/` | `prompts.md` with the prompts an operator types after installing, and one file per agent eval run |
@@ -96,7 +96,8 @@ the steps and the rules below are the skill's.
 4. **Prove fail then pass.** A guard test fails on the old code with exactly the fixed lines, and the running
    app shows the wrong result before and the right one after.
 5. **Reply only through the bridge's channel, in the reporter's language, without internals or other tenants'
-   data, and ask for confirmation.** The reporter is staff, not a developer.
+   data, with every claim checked against the code, and ask for confirmation.** The reporter is staff, not a
+   developer, and acts on every sentence; a wrong reply is corrected by a new one.
 6. **Outward acts only as asked.** Push and reply when the user asked; commits carry no tool attribution.
 
 Everything else, the tools, the names and the product's tone, is the host app's.

@@ -22,7 +22,7 @@ each one tells you:
 | Tenant | Which data to read; the scale of that tenant is itself a clue (see [root-causes.md](root-causes.md)) |
 | Reporter and role | Whose actions to rebuild; what the role may see and do |
 | Source | A form, the assistant, an email: the assistant path may carry a drafted description the form path lacks |
-| Page | The screen, so the component and its data loader |
+| Page | The screen, so the component and its data loader. Through the assistant it is where the chat was opened, which can be unrelated to the report: read the title first |
 | App version | The commit that was live, so the code to read is that commit, not `HEAD` |
 | Created at | The anchor of the timeline: the reporter's last writes before it usually name the record |
 | Viewport, browser, time zone | Layout and date bugs; ignore otherwise |
@@ -83,6 +83,24 @@ Look for the workaround before asking. A capability that exists on another scree
 in the report, is both a variant and evidence for the recommendation. Recommend one variant and say why; the
 user picks.
 
+## When the app already does what the reporter asks
+
+A report can ask for something the app already has: a "missing" block in a calendar that is one menu away,
+a tooltip that already shows the full note. Nothing is broken, nothing needs building, and the reply is a
+how-to. Do not say so until the code says so, at the app version in the metadata:
+
+| Check | Why |
+|---|---|
+| Every entry point to the capability: toolbar, row or column menu, shortcut, quick action, a dialog that offers it | The reply names the ones the reporter will find first; a single path is often the one they missed |
+| Every edge the reporter named: "after hours too", "the whole salon", "without clicking" | The capability can exist and still fail on exactly the edge they care about |
+| Every variant of the record: per person and for everyone, assigned and unassigned | A variant the app draws but another path ignores is a defect hiding inside a how-to (see [root-causes.md](root-causes.md)) |
+| The labels, verbatim from source | The reply quotes buttons and menu items; a paraphrase sends them looking for a word that is not there |
+| Which element does what: the name, the arrow beside it, a right click | "Click the name" and "click the arrow next to the name" open different things |
+
+Then ask the user, with three options, the first recommended: reply with the how-to; reply and make a small
+improvement the report points at; read production first to tell a capability nobody found from one that
+failed when used. A report filed from an unrelated page through the assistant points to the first.
+
 ## Checklist
 
 - [ ] Issue, comments and metadata read; app version noted
@@ -91,3 +109,5 @@ user picks.
 - [ ] Two or three hypotheses, each with the check that distinguishes it
 - [ ] If gaps remain: the user asked, with the three options and a recommendation
 - [ ] If the cause is behaviour: the user asked to pick a variant, the existing workaround among them
+- [ ] If the capability exists: every entry point, every named edge and every record variant checked in
+      the code before the user is asked

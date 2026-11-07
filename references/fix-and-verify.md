@@ -122,6 +122,10 @@ describe("employee_services reads", () => {
 in place, which is exactly what you need: stash, run the test, read the offenders it lists (they must be the
 lines you fixed), `git stash pop`, run it again green. Then run the whole suite and the linter.
 
+When the new tests sit in a file that already existed, a bare `git stash` takes them away with the fix. Stash
+the fixed source paths only, `git stash push <fixed file> ...`, and check `git stash list` is empty again
+afterwards.
+
 ## When the fix is new behaviour
 
 A product decision usually means new behaviour rather than a corrected line, and a source guard has nothing to
@@ -174,6 +178,65 @@ where table_schema = 'public' and column_name = 'sale_id';
 
 Delete those rows, then the record, then restore the seeded visits' status, in one transaction.
 
+## Proving a fix below the screen
+
+Some fixes change a rule the reporter never sees directly: an availability engine, a database function. Show
+it on the screen where you can (the public slot list for a day, before and after), and prove the rule itself
+against local data as well.
+
+**A server loader**, run with the host's test runner so path aliases and server-only guards resolve: a
+throwaway test that seeds one record, calls the loader, records the result and deletes the record in
+`finally`. Test runners often swallow console output, so write the result to a file in the scratch directory.
+
+```ts
+// src/server/zz-repro.test.ts, deleted after the run
+import { appendFileSync } from "node:fs";
+import { it } from "vitest";
+
+const OUT = process.env.REPRO_OUT ?? "/tmp/repro.out";
+const log = (...parts: unknown[]) => appendFileSync(OUT, parts.join(" ") + "\n");
+
+it("repro", async () => {
+  // Import inside the test so the local environment variables are set first.
+  const { loadDayAvailability, pickSlot } = await import("@/server/public-booking");
+  const { seedClosure, removeRecord } = await import("./repro-seed");
+  const id = await seedClosure("2031-03-04T11:00:00Z", "2031-03-04T13:00:00Z");
+  try {
+    const day = await loadDayAvailability("2031-03-04");
+    log("under the record:", JSON.stringify(pickSlot(day, 12 * 60 + 30, 60)));
+    log("after it:", JSON.stringify(pickSlot(day, 14 * 60, 60)));
+  } finally {
+    await removeRecord(id);
+  }
+}, 60_000);
+```
+
+Run it on the new code, `git stash push` the fixed file, run it again, pop. The two outputs side by side are
+the proof: a slot under the record on the old code, none on the new, and the slot after it on both.
+
+**A database function**, in one transaction that is rolled back: set the claims the function reads, seed,
+call the live function, load the migration file inside the same transaction, call it again.
+
+```sql
+-- run locally with psql -v ON_ERROR_STOP=1 -f repro.sql
+begin;
+select set_config('request.jwt.claims', '{"sub":"<seeded auth user id>","role":"authenticated"}', true);
+insert into appointments (tenant_id, kind, employee_id, resource_id, title, starts_at, ends_at)
+values ('<tenant id>', 'block', null, null, 'repro', '2031-03-03 12:00+00', '2031-03-03 13:00+00');
+select count(*)
+from find_appointment_conflicts('<member id>', null, '[2031-03-03 12:15+00,2031-03-03 12:45+00)')
+where title = 'repro';
+\i supabase/migrations/<new migration>.sql
+select count(*)
+from find_appointment_conflicts('<member id>', null, '[2031-03-03 12:15+00,2031-03-03 12:45+00)')
+where title = 'repro';
+rollback;
+```
+
+Call the database tool directly in shell commands. A command held in a variable (`DB="docker exec ... -c"`,
+then `$DB "insert ..."`) is not split into words under zsh; the insert never runs, both sides of the
+comparison read the same data, and the repro looks like a fix that changed nothing.
+
 ## Commit and push
 
 - Stage the changed files by path; one commit for the fix, its siblings and the guard.
@@ -193,4 +256,6 @@ Delete those rows, then the record, then restore the seeded visits' status, in o
       the rule in a pure module with unit tests, and the server re-checking every client-supplied id
 - [ ] Full suite and linter green
 - [ ] Every seed insert confirmed; running app wrong on the old code, right on the new; seeded data removed
+- [ ] A rule below the screen proven against local data on both codes; a database function in a rolled-back
+      transaction
 - [ ] Commit with `Fixes #N`, no attribution, pushed per the branch policy

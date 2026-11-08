@@ -4,7 +4,11 @@ All notable changes to this skill are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and the skill uses
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [0.2.0] - 2026-11-08
+
+The flow now answers every kind of report the bridge delivers: a defect, behaviour the app was built with, a
+capability it already has, a cause in the reporter's account, and a feature request, built or noted for later,
+each with its reply template and a claim check before anything is posted.
 
 ### Added
 

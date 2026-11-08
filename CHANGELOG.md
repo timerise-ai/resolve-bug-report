@@ -20,8 +20,9 @@ All notable changes to this skill are documented here. The format follows
   read the host's commercial terms and put the variants to the user, in `references/intake.md`; the template
   for a feature not built now, the claim-check row for a trade-off the user names, and reading earlier replies
   for the house tone, in `references/reply.md`; the commercial-terms seam in `references/adaptation.md`.
-- Provenance entries 8 to 10, 20 and 29 from a third recorded session, entries 11, 21 and 30 from a fourth,
-  entries 12 to 14 and 22 to 26 from a fifth, and a fourth, a fifth and a sixth eval prompt.
+- Provenance entries 8 to 10, 31 and 48 from a third recorded session, entries 11, 32 and 49 from a fourth,
+  entries 12 to 14 and 33 to 37 from a fifth, entries 15 to 20, 38 to 41 and 50 from a sixth, and a fourth to
+  a seventh eval prompt.
 - A how-to the user proposes is checked like any other, and the capability must let the reporter finish the
   task they named, in `references/intake.md`; reading the screen a request names for a defect fixable under a
   freeze.
@@ -35,6 +36,32 @@ All notable changes to this skill are documented here. The format follows
   stays open, and asking before merging into the default branch.
 - Three claim-check rows in `references/reply.md`: a label collapsed at the reporter's viewport, a toggle that
   is not saved, and a view that shows the record but cannot act on it.
+- A report caused by the account's setup: the role in the bridge metadata read against the member's record
+  now and its writes after the report, several reports from one member read as one timeline and answered one
+  by one, and a capability with no records for the tenant, in `references/intake.md` and
+  `references/evidence.md`; reading the live row level security policies.
+- Permissions in two layers in `references/root-causes.md`: the wrong role, a per-member revoke, a grant the
+  data layer refuses, a refusal shown as a generic failure, a write control shown to a role without it; the
+  unordered capped read and the oversized id filter; four new report signs.
+- In `references/fix-and-verify.md`: three sweep rows, `fetchAllByIds` for second reads by id, the three
+  permission fixes with the policy probe, the read-only entry-point list and the two-role run, a shell
+  function instead of a command in a variable, paths written out for `git stash push`, and listing migrations
+  before a merge.
+- The template for a cause in the account's setup, naming the tenant's own members to an admin, and four
+  claim-check rows in `references/reply.md`.
+- From a seventh recorded session, in `references/intake.md`: opening an attachment behind a login in the
+  user's signed-in browser and reading the marks drawn on it; where the capability sits at the reporter's
+  viewport as a how-to check; a variant the user changes mid-work replacing the old one everywhere; reading
+  every path that would carry a requested field for a defect it already has; the full build's product
+  questions asked in one batch before the migration.
+- In `references/fix-and-verify.md`: printing a runtime value when the running app disagrees with a passing
+  test (a dev server holding a stale module); proving a data migration that rewrites rows in a rolled-back
+  transaction, then applying it without a reset, and the seed's changed section when a reset is refused; the
+  whole suite before every push, and a failure that also fails on the old code named, not fixed.
+- The template after a requested feature is built, its claim-check row and checklist line, in
+  `references/reply.md`; critical fact 8 notes that the readers' map often finds a defect.
+- Provenance entries 21 to 25, 42 to 45 and 51 from a seventh recorded session, renumbering the ledger to 51
+  entries, and an eighth eval prompt.
 
 ### Changed
 

@@ -20,8 +20,8 @@ each one tells you:
 | Field | What it gives you |
 |---|---|
 | Tenant | Which data to read; the scale of that tenant is itself a clue (see [root-causes.md](root-causes.md)) |
-| Reporter and role | Whose actions to rebuild; what the role may see and do |
-| Source | A form, the assistant, an email: the assistant path may carry a drafted description the form path lacks |
+| Reporter and role | Whose actions to rebuild; what the role may see and do. The bridge reads the role when it files the issue, so a role that contradicts the title ("I am reception" from a basic staff account) is the first cause to check |
+| Source | A form, the assistant, an email, the app's error screen: the assistant path may carry a drafted description the form path lacks; the error screen carries the message and an error reference, the message is often the action's generic fallback, and the reference finds the server's log line |
 | Page | The screen, so the component and its data loader. Through the assistant it is where the chat was opened, which can be unrelated to the report: read the title first |
 | App version | The commit that was live, so the code to read is that commit, not `HEAD` |
 | Created at | The anchor of the timeline: the reporter's last writes before it usually name the record |
@@ -29,7 +29,11 @@ each one tells you:
 | Report id or link | The key to the attachments and the report row in production |
 
 Attachments are often links, not inline images, because a login-gated file cannot be proxied by the tracker.
-No link in the body usually means no attachment, but confirm it against the report row in production.
+No link in the body usually means no attachment, but confirm it against the report row in production. When the
+user says the agent may use their signed-in browser, open the link there: it redirects to a short-lived signed
+URL, and the screenshot is evidence, often more than the description. Marks drawn on it (a box where a tab
+should be, a line under a header) show the layout the reporter wants. The signed URL stays out of the reply
+and the commit.
 
 ## The sufficiency matrix
 
@@ -96,7 +100,9 @@ how-to. Do not say so until the code says so, at the app version in the metadata
 | Every variant of the record: per person and for everyone, assigned and unassigned | A variant the app draws but another path ignores is a defect hiding inside a how-to (see [root-causes.md](root-causes.md)) |
 | The task they named, to its end: settle, send, print, not only see | A view that lists the record but cannot act on it is not the answer; a list whose rows only link elsewhere sends them to a dead end |
 | The labels, verbatim from source | The reply quotes buttons and menu items; a paraphrase sends them looking for a word that is not there |
+| The tenant's own records on that screen | A capability with nothing in it for this tenant (the records live in another system that does not sync them) is answered with why it is empty and how records get there, not only with where it is |
 | Which element does what: the name, the arrow beside it, a right click | "Click the name" and "click the arrow next to the name" open different things |
+| Where it sits at the reporter's viewport (the metadata has the size) | A card at the bottom of a panel can sit below the fold on a short laptop screen and read as missing; that is the cause, and moving it up or into its own tab is the small improvement |
 
 Then ask the user, with three options, the first recommended: reply with the how-to; reply and make a small
 improvement the report points at; read production first to tell a capability nobody found from one that
@@ -107,6 +113,34 @@ checks on it before drafting. When the place the user named shows the record but
 so before writing a word to the reporter, name the path that does work, and look for why the reporter could
 not reach it: a default-on filter that hides the record together with its column is a defect, and the user
 then picks between fixing it with the how-to and the how-to alone.
+
+The user may change the variant while you work ("after all, give it its own tab"). The new choice replaces the
+old one everywhere the old one reached: the code, the tests, the help text and the draft reply. Say in the
+report back which variant shipped.
+
+## When the cause is the account's setup
+
+A member writes "I am at reception and cannot settle visits" and the bridge says their role is basic staff.
+Nothing is broken: the account was created with the wrong role, or a per-member switch took a permission
+away. Read the role and the per-member overrides at the time of the report and now, and the audit trail of
+the member's record between the two ([evidence.md](evidence.md)): the tenant's admin often fixes it minutes
+after the report, and sometimes changes something else that contradicts what was asked.
+
+| Check | What it settles |
+|---|---|
+| The role at filing (the bridge metadata) against the role that holds the permission | Whether the role alone explains it |
+| The per-member overrides, at filing and now | A revoke the admin set, a grant the data layer refuses ([root-causes.md](root-causes.md)) |
+| Writes to the member's record after the report | Already fixed; or a new setting that undoes what the report asks for |
+| The screen the reporter used, as their role | A control offered to a role that cannot use it, and the message it gave: a generic failure hides the permission |
+
+The reply is then a how-to: what the role allows, what has changed, what the reporter does now (often only a
+refresh), and where the admin changes it ([reply.md](reply.md)). The permission system itself is a screen to
+read for defects, as in a request: an override the data layer refuses, a label that hides what a permission
+covers, a write control shown to a role without it. Each goes to the user as a variant beside the how-to.
+
+Several reports from one reporter within minutes usually share this cause. Read the tenant's timeline once,
+across all of them, and still answer each report in its own thread: each reporter waits there, and each
+report can lead to a different sibling defect.
 
 ## When the report asks for a feature the app does not have
 
@@ -121,6 +155,7 @@ backlog without a word: the flow runs up to the reply, even if the code is never
 | Read the host's commercial terms: a feature freeze, a clause that work outside the contract is quoted first, the labels for requests | Whether "build it" is on the table now; these live in the host's notes, not in the code |
 | Write the variants, the narrow one among them | A narrow variant often keeps the rules that pay or bill on one value and widens only what is displayed |
 | Read the screen the request names for a defect: its export, totals and filters against what it shows | A control that ignores the screen's state (an export that ignores the period on screen) is a defect a freeze allows fixing; it goes in as a variant beside "noted for later" |
+| Read every path that would carry the new field for a defect it already has | The readers' map often finds money already miscounted: an amount folded into a visit's total that the payout never reads. It is fixed whichever variant ships, and told to the reporter |
 
 Then ask the user, the recommended variant first:
 
@@ -130,6 +165,12 @@ Then ask the user, the recommended variant first:
 | Build the narrow variant | The request is cheap without touching the rules that pay or bill: one primary value, extra values for display |
 | Build it fully | The tenant needs the rules to follow too, and the user accepts deciding which value wins in each |
 | Read production first | Their data would change the answer, such as how their category tree is actually shaped |
+
+When the user picks the full build, the readers' map raises product questions the code cannot answer: what a
+rule falls back to when the new target has none of its own, what happens to existing data that now overlaps
+(copies to merge, or to keep apart), where in the app the new choice is offered. Ask them in one question,
+each with a recommendation, before writing the migration. A full build under a freeze or outside the contract
+is the user's call; the quote clause goes into the report back to the user, not into the reply.
 
 The user may add a consequence while you work, such as "it would mean removing the per-category commission
 rules". That is their product decision, not a claim the code can prove. Carry it into the reply in the
@@ -148,3 +189,7 @@ reasoning was theirs. See [reply.md](reply.md).
       the code before the user is asked
 - [ ] If it asks for something new: the absence confirmed, every reader of the field listed, the host's
       commercial terms read, and the user asked to pick a variant
+- [ ] If it is built in full: the open product questions asked in one batch, and every reader of the new
+      field checked for a defect it already has
+- [ ] If the account's setup may be the cause: role and overrides at filing and now, the member's record's
+      writes after the report, and the reporter's screen as their role

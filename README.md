@@ -70,11 +70,11 @@ explicitly on a first run.
 | File | Contents |
 |---|---|
 | `SKILL.md` | Entry point: trigger, flow diagram, seam paragraph, critical facts, hard rules, quick start, reference directory |
-| `references/intake.md` | Reading the issue and the bridge metadata, the sufficiency matrix, asking the user how to close gaps, a capability that already exists, a feature it does not have |
-| `references/evidence.md` | The read-only production protocol, introspection, the report row, the reporter's timeline |
-| `references/root-causes.md` | Candidate causes with the check that confirms or kills each; the capped read and the record nobody owns in detail |
-| `references/fix-and-verify.md` | Sibling sweep, paging helper, guard test, the fail-then-pass repro, proving a rule below the screen, commit and push |
-| `references/reply.md` | The reply channel, the claim check, what goes in and stays out, templates after a fix, for a how-to, for a feature not built now, for a correction and when asking for details |
+| `references/intake.md` | Reading the issue and the bridge metadata, the sufficiency matrix, asking the user how to close gaps, a capability that already exists, a cause in the account's setup, a feature it does not have |
+| `references/evidence.md` | The read-only production protocol, introspection, the report row, the reporter's timeline, the member's account and the live policies |
+| `references/root-causes.md` | Candidate causes with the check that confirms or kills each; the capped read, the record nobody owns and permissions in two layers in detail |
+| `references/fix-and-verify.md` | Sibling sweep, paging helpers, guard test, permission fixes and the policy probe, the fail-then-pass repro, proving a rule below the screen, commit and push |
+| `references/reply.md` | The reply channel, the claim check, what goes in and stays out, templates after a fix, for a how-to, for a feature not built now, after a feature is built, for the account's setup, for a correction and when asking for details |
 | `references/adaptation.md` | The seam contract with the host, vocabulary, order of work, non-negotiables |
 | `references/provenance.md` | What the recorded sessions corrected, what was kept deliberately, what was added |
 | `evals/` | `prompts.md` with the prompts an operator types after installing, and one file per agent eval run |
@@ -136,8 +136,7 @@ This is one of the [Timerise Skills](https://github.com/timerise-ai/skills): mod
 Router** apps written by our own senior engineers from the modules they have shipped, not synthetic, each
 published as its own repository and indexed there. They share one layout, so an agent that has read one knows
 how to read the next: a `SKILL.md` entry point, `references/` loaded on demand, and a seam contract carrying
-the module's non-negotiables. This one is for the team behind an app: it turns a customer's bug report into a
-fix and an answer.
+the module's non-negotiables.
 
 ## Author
 

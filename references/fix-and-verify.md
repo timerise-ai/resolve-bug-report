@@ -23,6 +23,9 @@ Classify each hit. For a capped read the classes are:
 | Write (insert, delete) | Not a read | None |
 | A cap written on purpose (`.limit(500)` and a comment calling it a convenience) over a whole table in name order | Defect: it hides the same names | Page it, and rewrite the comment |
 | A control on the same screen that bounds a different field (the list filters by expiry, the export by issue date) | Not the same defect: wiring the filter through exports a different set than the one shown | None in this change; tell the user which field should win |
+| A `.limit(n)` with no `.order(...)`, sorted in code afterwards | Defect: past the cap it keeps an arbitrary subset, often without the newest rows | Page it with a stable order, sort after |
+| A second read that sends every id of the first in one `.in(...)` | Defect past a few hundred ids: the request line outgrows the gateway or the cap cuts it | Chunk the ids and page each chunk |
+| A permission guard that checks the role alone where the others check role and overrides | Defect: a grant never works there, a revoke never holds | The override-aware check |
 
 A storefront or public path that uses the same rule as the screen in the report usually has the same defect,
 and the reporter never saw it. Fix it in the same change.
@@ -77,6 +80,29 @@ fetchAllRows<StaffAssignmentRow>(
       .range(from, to),
   "getNewAppointmentOptions(employee_services)",
 ).then((data) => ({ data })),
+```
+
+A second read keyed by the first read's ids needs the same care. Chunk the ids so the request line stays
+short, and page each chunk, since one id can match many rows:
+
+```ts
+// lib/supabase/paginate.ts, after fetchAllRows
+/** Ids per `.in(...)` filter: past a few hundred uuids the request line outgrows what gateways accept. */
+export const ID_CHUNK = 200;
+
+/** `fetchAllRows` over a list of ids, in chunks; the factory builds the same ordered query for each. */
+export async function fetchAllByIds<T>(
+  ids: readonly string[],
+  page: (chunk: string[], from: number, to: number) => PromiseLike<PageResult>,
+  label: string,
+): Promise<T[]> {
+  const rows: T[] = [];
+  for (let i = 0; i < ids.length; i += ID_CHUNK) {
+    const chunk = ids.slice(i, i + ID_CHUNK);
+    rows.push(...(await fetchAllRows<T>((from, to) => page(chunk, from, to), label)));
+  }
+  return rows;
+}
 ```
 
 ## The guard test
@@ -164,6 +190,61 @@ by construction; the running app is where fail then pass is shown.
 
 Commit new behaviour as `feat`, a corrected one as `fix`; both carry `Fixes #<number>`.
 
+## When the defect is in permissions
+
+A permission defect is rarely one line. Three fixes recur, often together, and each has its own proof.
+
+| Fix | Change | Proof |
+|---|---|---|
+| The refusal says which permission | The guard's error becomes the error class the action wrapper hands back to the form, with the permission's label as its message | A unit test: the wrapper given that error returns the label and logs nothing; it fails on the old code with the generic fallback |
+| The matrix agrees with the data layer | A list per permission of the roles the table's policy admits; an override may grant only to those, the effective check ignores a stored grant outside it, and the save drops it | An integration test that probes each policy as every seeded role and compares with the list |
+| The screen is read-only for a role without the write | One prop for the write permission on the screen; every entry point to a write reads it | The running app as that role and as one that has it |
+
+The policy probe, with a client signed in as a seeded member of each role and one seeded row per table:
+
+```ts
+// tests/integration/grant-probe.ts
+import type { SupabaseClient } from "@supabase/supabase-js";
+
+export type Probe = { table: string; op: "update" | "select"; id: string };
+
+/** The roles whose session gets through the table's policy on one seeded row, sorted. */
+export async function admittedRoles<R extends string>(
+  clients: Record<R, SupabaseClient>,
+  probe: Probe,
+  tenantId: string,
+): Promise<R[]> {
+  const admitted: R[] = [];
+  for (const role of Object.keys(clients) as R[]) {
+    const db = clients[role];
+    // A no-op update: a role outside the policy's USING sees zero rows, and no error.
+    const { data } =
+      probe.op === "update"
+        ? await db.from(probe.table).update({ tenant_id: tenantId }).eq("id", probe.id).select("id")
+        : await db.from(probe.table).select("id").eq("id", probe.id);
+    if ((data ?? []).length === 1) admitted.push(role);
+  }
+  return admitted.sort();
+}
+```
+
+One test per listed permission asserts `admittedRoles` equals the list, and one asserts every listed
+permission has a probe. Two unit tests keep the matrix honest without a database: a role holding a permission
+by default is always one the list admits, and a revoke works for every role. Existing tests that used a grant
+the database refuses as their example (a basic member granted the till) encoded the defect; move them to a
+grant that works and add the refused one as a negative case.
+
+For the read-only screen, list every entry point before hiding any: dragging, the context menu, the column
+menu, the toolbar's add button, keyboard shortcuts, a click on an empty cell, the detail drawer's status menu
+and edit link and primary button, inline editors, and list rows with their own buttons. Keep what the role may
+still do (their own time block), and check the server: an action that only asks for a session reaches the
+database and comes back with a misleading refusal, so give it the permission check too.
+
+Drive the running app as the role without the permission, then as one with it. The second run catches a
+regression the first cannot see, and the first catches what the code reading missed: switching drag off by
+passing the touch-device flag also removed the click that opened the tile, because on a desktop that click
+travelled through the drag handler.
+
 ## Reproduce in the running app
 
 The guard proves the code; the repro proves the reporter's screen. Use the host's verify procedure (a project
@@ -179,6 +260,12 @@ skill, Playwright, a dev login) and this order:
    read the screen again. It must show the wrong list. If it shows the right one, the repro is not
    reproducing: go back to step 2, do not conclude the old code was fine.
 5. `git stash pop`, then delete the seeded records so the local dataset stays neutral.
+
+When the running app disagrees with a test that passes against the same database, print the runtime value
+before debugging the logic. A dev server can keep a stale module after edits made in place (`sed -i` swaps the
+file under the watcher), and touching the file may not wake it. Render the suspect constant into the page for
+one request, compare it with the source, and when they differ ask the user before restarting their dev
+server. Remove the probe afterwards.
 
 For a list ordered by name, seed filler names that sort first (`Aaa Repro 0001` onwards, past the cap) and one
 target that sorts last, then search the picker for the target as the reporter's role. For a visibility fix,
@@ -264,9 +351,19 @@ where title = 'repro';
 rollback;
 ```
 
+**A data migration** that rewrites existing rows (merging copies, moving a column into a link table) is proven
+the same way: in a rolled-back transaction, seed the shapes it must handle (two identical rows, an inactive
+copy, a near copy that must stay apart, a visit line pointing at the row that goes away), run the migration's
+step, read the result, roll back. Then apply the whole migration to the local database with the host's
+non-destructive command (`supabase migration up`, not a reset) to run it over real local data. When a reset
+that would also run the seed is refused, run the seed's changed section inside a rolled-back transaction.
+
 Call the database tool directly in shell commands. A command held in a variable (`DB="docker exec ... -c"`,
 then `$DB "insert ..."`) is not split into words under zsh; the insert never runs, both sides of the
-comparison read the same data, and the repro looks like a fix that changed nothing.
+comparison read the same data, and the repro looks like a fix that changed nothing. A shell function
+(`D() { docker exec ... -c "$1"; }`) splits as expected. The same holds for a list of paths kept in one
+variable and passed to `git stash push`: zsh hands it over as one path, nothing is stashed, and the "old
+code" run is the new code. Write the paths out.
 
 ## Commit and push
 
@@ -279,21 +376,30 @@ comparison read the same data, and the repro looks like a fix that changed nothi
 - A defect fixed inside a report that stays open (a request noted for later) is committed with `Refs #N`, not
   `Fixes #N`, so the merge does not close the request; label the issue as the host's request label.
 - No tool attribution in the message. Check `git log -1 --format=%B` before pushing.
+- Run the whole suite before every push, not the folders you touched: a guard over the help text or the docs
+  (a word limit, a label check) lives in another folder and fails only in a full run, by then on a pushed
+  commit. A test that fails on the old code as well is not yours: run it there, name it in the report, and
+  leave it.
 - Push only when the user asked for the issue to be resolved end to end, and only to the branch the host's
   policy names.
 - Merging into the default branch deploys to production: do it only when the user asks for that merge. A bare
   "push" when the branch is already pushed most likely means it; say what is already pushed, list the commits
-  the merge would ship, and ask.
+  the merge would ship, and ask. Before the merge, list the database migrations it carries when the host
+  applies them on push, and follow the host's merge convention (a merge commit when its history has them).
 
 ## Checklist
 
 - [ ] Every sibling found and classified; every defect fixed in one change
 - [ ] Guard test fails on the old code with exactly the fixed lines, passes on the new; for new behaviour,
       the rule in a pure module with unit tests, and the server re-checking every client-supplied id
-- [ ] Full suite and linter green
+- [ ] Whole suite and linter green before every push; a failure that also fails on the old code named, not
+      fixed
+- [ ] A migration that rewrites rows proven in a rolled-back transaction, then applied without a reset
 - [ ] Every seed insert confirmed; running app wrong on the old code, right on the new; seeded data removed
 - [ ] A rule below the screen proven against local data on both codes; a database function in a rolled-back
       transaction
 - [ ] Existing tests that encoded the old behaviour changed and named
+- [ ] For a permission defect: the refusal names the permission, the matrix is held against the live policies,
+      and the screen is checked as a role without the write and as one with it
 - [ ] Commit with `Fixes #N` (or `Refs #N` when the report stays open), no attribution, pushed per the branch
       policy; the default branch merged only when asked

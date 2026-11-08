@@ -16,12 +16,13 @@ description: >
   everything you need", /reply, leave a reply for the reporter, ask the reporter to confirm, audit log,
   production read only, supabase db query --remote --read-only, PostgREST max_rows, 1000-row cap, "Fixes #",
   "settled separately instead of together", "it already exists", "for the whole salon", "can it be done",
-  feature request, feature freeze, out of scope, "only clients starting with A", "explain where the list is".
+  feature request, feature freeze, out of scope, "only clients starting with A", "explain where the list is",
+  "I am at reception and cannot settle", wrong role, permission override, "could not move the visit".
   Carries a sufficiency matrix, a read-only production protocol with the user's approval, a reporter
   timeline query, a root-cause table with the check that tells each cause apart, the variants to put to the
   user when the cause is behaviour, a guard test that fails on the old code, a claim check before any reply,
-  and reply templates for a fix, a how-to, a feature not built now and a correction. Any git
-  repository with the gh CLI and a Postgres backed multi-tenant app; the tracker, the reply channel,
+  and reply templates for a fix, a how-to, a feature not built now, the account's setup and a correction.
+  Any git repository with the gh CLI and a Postgres backed multi-tenant app; the tracker, the reply channel,
   production access and the app's verify procedure are the seams. Not the bridge itself, not bulk triage,
   not outage response.
 ---
@@ -77,7 +78,8 @@ skill's contract. [adaptation.md](references/adaptation.md) has the table.
 ## Critical facts
 
 1. **The bridge metadata and the audit trail outweigh the description.** The page path names the screen,
-   the timestamp anchors a timeline, and the reporter's last writes before filing usually name the record.
+   the role says what the reporter may do, the timestamp anchors a timeline, and the reporter's last writes
+   before filing usually name the record.
 2. **Production access is the user's decision, once per session.** Read only, through a tool that holds its
    own credentials; an agent's permission layer may refuse it, and copying a key into a file is refused too.
 3. **Introspect before you query.** Column names drift from what the code suggests; `to_jsonb(row)` and
@@ -95,7 +97,8 @@ skill's contract. [adaptation.md](references/adaptation.md) has the table.
    variants, including a workaround the app already has, recommend one, and build what the user picks. When
    it already does what the reporter asks, check every entry point, every edge they named and every variant
    of the record first: a variant the app draws but another path ignores is a defect inside the how-to. When
-   it lacks what they ask, list every reader of the field the feature would change before asking the user.
+   it lacks what they ask, list every reader of the field the feature would change before asking the user;
+   that map often finds a defect those readers already have.
 
 ## Hard rules
 
@@ -144,11 +147,11 @@ skill's contract. [adaptation.md](references/adaptation.md) has the table.
 
 | Scenario | Trigger keywords | Reference |
 |---|---|---|
-| Reading the report, deciding if it is enough | issue view, empty body, no description, metadata table, page path, app version, sufficiency, missing information, product decision, variants, workaround, already exists, entry points, how-to, feature request, new feature, readers of the field, feature freeze, out of scope, proposed how-to, finish the task, defect inside a request | [intake.md](references/intake.md) |
-| Reading production safely | read only, supabase db query --remote, audit_log, timeline, to_jsonb, information_schema, actor_id, attachments, untrusted data, permission denied, burst of writes, records behind the writes | [evidence.md](references/evidence.md) |
-| Naming the cause | wrong list, missing employee, everyone shown, max_rows, 1000 rows, truncated, fallback, sync overwrote, archived, filtered out, cache, separate receipts, one per record, portal import, missing group, whole salon, for everyone, null owner, salon-wide, name order, only A, default filter, hidden column, export ignores the period | [root-causes.md](references/root-causes.md) |
-| Fixing, testing, reproducing, committing | sibling sweep, guard test, fetchAllRows, range, repro, Playwright, git stash, Fixes #, default branch, push, new behaviour, pure module, client-supplied ids, exclusion constraint, cleanup, git stash push, server loader, database function, rolled-back transaction, Refs #, merge to main, limit on purpose, tests that encode old behaviour, download body empty | [fix-and-verify.md](references/fix-and-verify.md) |
-| Answering the reporter | /reply, reply template, confirm, plain language, reporter's language, ask for details, behaviour change, opt out, check every claim, how-to, correction, wrong reply, not now, noted for later, quote, trade-off, earlier replies, collapsed label, toggle not saved, view that cannot act | [reply.md](references/reply.md) |
+| Reading the report, deciding if it is enough | issue view, empty body, no description, metadata table, page path, app version, sufficiency, missing information, product decision, variants, workaround, already exists, entry points, how-to, feature request, new feature, readers of the field, feature freeze, out of scope, proposed how-to, finish the task, defect inside a request, wrong role, account setup, several reports, error screen, empty screen, attachment behind a login, signed-in browser, below the fold, viewport, variant changed mid-work, full build, product questions, readers hide a defect | [intake.md](references/intake.md) |
+| Reading production safely | read only, supabase db query --remote, audit_log, timeline, to_jsonb, information_schema, actor_id, attachments, untrusted data, permission denied, burst of writes, records behind the writes, member's role, overrides, pg_policies, settings after the report | [evidence.md](references/evidence.md) |
+| Naming the cause | wrong list, missing employee, everyone shown, max_rows, 1000 rows, truncated, fallback, sync overwrote, archived, filtered out, cache, separate receipts, one per record, portal import, missing group, whole salon, for everyone, null owner, salon-wide, name order, only A, default filter, hidden column, export ignores the period, wrong role, revoke, grant refused, RLS role list, generic error, read-only, .in ids | [root-causes.md](references/root-causes.md) |
+| Fixing, testing, reproducing, committing | sibling sweep, guard test, fetchAllRows, range, repro, Playwright, git stash, Fixes #, default branch, push, new behaviour, pure module, client-supplied ids, exclusion constraint, cleanup, git stash push, server loader, database function, rolled-back transaction, Refs #, merge to main, limit on purpose, tests that encode old behaviour, download body empty, fetchAllByIds, policy probe, refusal by name, read-only screen, two roles, shell function, stale dev server, runtime value, data migration, merge copies, seed in a transaction, whole suite before push, fails on old code too | [fix-and-verify.md](references/fix-and-verify.md) |
+| Answering the reporter | /reply, reply template, confirm, plain language, reporter's language, ask for details, behaviour change, opt out, check every claim, how-to, correction, wrong reply, not now, noted for later, quote, trade-off, earlier replies, collapsed label, toggle not saved, view that cannot act, account setup, role changed, name the cards, feature built, existing data moved, defect fixed on the way | [reply.md](references/reply.md) |
 | Fitting the flow to the host | Linear, Jira, GitHub, psql, replica, verify skill, branch policy, rename, commercial terms, feature freeze, labels | [adaptation.md](references/adaptation.md) |
 | Why the flow is shaped this way | provenance, kept deliberately, added | [provenance.md](references/provenance.md) |
 

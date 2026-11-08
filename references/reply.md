@@ -38,6 +38,7 @@ the house tone, and the reporter has seen them before.
 | Whether they must do anything: usually "refresh, nothing to redo" | Internal ticket numbers other than their own |
 | A request to check, on the record they reported if you know it | |
 | What to send if it is still wrong: the record's name and the expected result | |
+| To an admin, the members of their own tenant whose cards need a change, by name | To a member, which colleague changed their account: "the salon's owner changed your role" is enough |
 
 ## Every claim is checked before it is posted
 
@@ -56,6 +57,11 @@ them and trace each to the code or the running app. A claim that has not been tr
 | "Click Filters" | The label at the reporter's viewport (the metadata has it): a word that collapses to an icon on a narrow toolbar is named with the icon too |
 | "Untick X to see everyone" | Whether the choice is saved: a toggle held only in page state resets on reload, and the reply says so |
 | "You can do it in view X" | The view lets them finish the task, not only see the record: a list whose rows only link elsewhere cannot settle anything |
+| "Your role is now X", "the owner changed it" | The member's row now and the write in their audit trail; never inferred from the report or from what the admin said they would do |
+| "A refresh is enough" | The role and overrides are read on every request, not held in the session token until the next sign-in |
+| "Switch X back to Default" | The card's control and its option labels as they read in production today; a label renamed in an unreleased commit is named as the new one coming with the update |
+| "The screen is empty because" | The tenant's own count on that screen, and that the other system does not sync those records |
+| "Your existing records move over", "identical ones are merged into one" | The migration's step run on local data, and the rule it merges by, named in the screen's fields |
 
 The cheapest moment to find a defect is while checking a reply. A scope claim that fails its check is often a
 sibling defect in a path nobody looked at: stop, tell the user, and fix it before the correction goes out.
@@ -68,8 +74,8 @@ with the formal "Pani" or "Pan" if the tenant's product uses it.
 ```text
 /reply Hello, thank you for the report!
 
-We found the cause. <One or two sentences: what the screen did wrong, in the reporter's terms, and why, without
-internals.> <One sentence on what was not wrong, if they may have doubted their own setup.>
+We found the cause. <One or two sentences: what the screen did wrong, in the reporter's terms, and why,
+without internals.> <One sentence on what was not wrong, if they may have doubted their own setup.>
 
 The fix covers <the screens they use>. It will work after the next app update; refresh the page then, there
 is nothing to set up again.
@@ -140,6 +146,31 @@ so we have noted it and will <what happens next: a quote, a review after launch>
 If <the consequence> would be acceptable to you, please let us know, and we will take it into account.
 ```
 
+## Template, after a requested feature is built
+
+The user chose to build what the reporter asked ([intake.md](intake.md)). Say what the app did before in the
+screen's words, where the feature now lives with every label as the screen shows it, the rules they asked
+about with what each falls back to, what happened to their existing data, and any defect fixed on the way.
+
+```text
+/reply Hello, thank you for the report!
+
+Until now <what the app did, in the screen's words>, so <the friction they described>.
+
+We changed it. After the next app update <where the feature lives: the button, the screen>. <What they set
+there, with the labels as the screen shows them.> <Each rule they asked about: who it applies to, and what
+it falls back to when nothing is set.>
+
+<Existing data, when the change moved it: "Your existing <records> move over by themselves; identical ones
+are merged into one." Nothing to enter again, when true.>
+
+<A defect found on the way, when it touched them: "While building this we also fixed <what was wrong, in
+their terms>.">
+
+Please open <the screen> after the update, <the setup step they need to take>, and confirm it works the way
+you expected. If something is missing, tell us briefly what.
+```
+
 ## Template, correcting a reply already sent
 
 When a posted reply turns out wrong, post a new reply through the channel; an edited comment may never reach
@@ -158,6 +189,32 @@ Until the update, <the workaround that gives them the right result today>.
 
 Please confirm after the update that <the expected result>.
 ```
+
+## Template, when the account's setup is the cause
+
+The app works; the member's role or a per-member switch stopped them ([intake.md](intake.md)). Say what the
+role allows in the words of the console, what has changed since the report (only what the audit trail shows),
+what they do now, and, to an admin, which cards to change and how.
+
+```text
+/reply Hello, thank you for the report!
+
+The cause was the account's role. When you reported it, your account had the role <role>, which <does not
+include the action, in their words>. <The roles that do.> Nothing was wrong with your data or your steps.
+
+<What changed, when the audit trail shows it: "Today your salon's owner changed your role to <role>">, so
+<the action> works after a page refresh; there is nothing to set up again.
+
+<To an admin, per member: "<name>: <permission label> is switched off, which also blocks <what it covers>.">
+<How to undo it: <section> > <card> > <panel>, set <label> to <option> and press <button>.>
+
+Please check <the action, on the record they named if known> and confirm here. If it still does not work,
+tell us which <record> and what message appears.
+```
+
+When the fix also changes the console (labels that now name what a permission covers, controls hidden from
+roles without them, a refusal that names the permission), add one paragraph saying so and that it arrives with
+the next update.
 
 ## Template, when the evidence did not settle it
 
@@ -189,5 +246,9 @@ the deploy that makes the fix live, and the issue closing when the commit reache
 - [ ] For a behaviour change: the new behaviour in the order they meet it, and how to opt out
 - [ ] For a feature not built now: today's behaviour, the consequence the user named, why not now, the
       workaround, and the question that shapes the later decision
+- [ ] For a feature built: where it lives, what to set, the fallback rules, what happened to existing data,
+      and a defect fixed on the way
+- [ ] For the account's setup: the role then and now from the data, what to do now, and to an admin the cards
+      to change with labels as production shows them
 - [ ] No internals, no other tenant's data
 - [ ] The user told the URL and what is still pending

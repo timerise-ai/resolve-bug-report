@@ -26,3 +26,8 @@ isolated: true
 timedOut: false
 runUrl: https://github.com/timerise-ai/resolve-bug-report/actions/runs/42527246018
 ---
+
+Rubric 8/8, item 1 scored on the checks: typecheck and build passed, and the `fail` is the zero-diff rule
+after it reverted the `tsconfig.json` that `next build` reformats. Matrix, three causes each with the check
+that settles it, and the three options with read-only production recommended first, the choice left to the
+operator because it was told not to ask. Run 42527246018. Scored from the JSON summary.

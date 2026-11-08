@@ -4,7 +4,9 @@ All notable changes to this skill are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and the skill uses
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [0.2.1] - 2026-11-08
+
+From scoring the prompt-1 agent evals of 0.2.0.
 
 ### Changed
 

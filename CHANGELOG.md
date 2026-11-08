@@ -21,8 +21,7 @@ All notable changes to this skill are documented here. The format follows
   for a feature not built now, the claim-check row for a trade-off the user names, and reading earlier replies
   for the house tone, in `references/reply.md`; the commercial-terms seam in `references/adaptation.md`.
 - Provenance entries 8 to 10, 31 and 48 from a third recorded session, entries 11, 32 and 49 from a fourth,
-  entries 12 to 14 and 33 to 37 from a fifth, entries 15 to 20, 38 to 41 and 50 from a sixth, and a fourth to
-  a seventh eval prompt.
+  entries 12 to 14 and 33 to 37 from a fifth, and entries 15 to 20, 38 to 41 and 50 from a sixth.
 - A how-to the user proposes is checked like any other, and the capability must let the reporter finish the
   task they named, in `references/intake.md`; reading the screen a request names for a defect fixable under a
   freeze.
@@ -61,7 +60,7 @@ All notable changes to this skill are documented here. The format follows
 - The template after a requested feature is built, its claim-check row and checklist line, in
   `references/reply.md`; critical fact 8 notes that the readers' map often finds a defect.
 - Provenance entries 21 to 25, 42 to 45 and 51 from a seventh recorded session, renumbering the ledger to 51
-  entries, and an eighth eval prompt.
+  entries.
 
 ### Changed
 

@@ -26,3 +26,8 @@ isolated: true
 timedOut: false
 runUrl: https://github.com/timerise-ai/resolve-bug-report/actions/runs/42504940262
 ---
+
+Rubric 8/8. Matrix filled, not enough to fix, three hypotheses each with a confirming and a killing check, the
+read-only queries offered for approval and the three options with production recommended first. It wrote no
+code. The one changed file is `tsconfig.json`, reformatted by `next build`, as in the Claude Code run. Scored
+from the JSON summary and the tool counts.

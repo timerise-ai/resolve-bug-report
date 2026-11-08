@@ -26,3 +26,9 @@ isolated: true
 timedOut: false
 runUrl: https://github.com/timerise-ai/resolve-bug-report/actions/runs/42504940262
 ---
+
+Rubric 8/8. It filled the sufficiency matrix, decided there was not enough to fix, gave hypotheses each with
+the check that confirms or kills it, and put the three options to the operator with the read-only production
+path recommended first. It wrote no code. The one changed file is `tsconfig.json`, reformatted by `next
+build`, so `result: pass` rests on the build's rewrite and not on the agent's work; see the Codex note of
+this release. Scored from the JSON summary.

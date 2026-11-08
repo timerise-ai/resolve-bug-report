@@ -382,3 +382,9 @@ trigger side effects. The list of read-only entry points comes from one calendar
 The template "after a requested feature is built" in [reply.md](reply.md) generalises one reply from the
 seventh session. The fallback rule it shows (an add-on follows a percentage service rate, not a fixed amount)
 was one user's decision.
+
+### 52. The choice still goes in the report when the run may not ask
+
+The paragraph in [intake.md](intake.md) and the clause in the quick start come from the agent eval of 0.2.0,
+not from a recorded session. Told to work unattended, one agent listed what it would need and never laid out
+the three options. No session has run the unattended case with a real report.

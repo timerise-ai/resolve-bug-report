@@ -4,6 +4,17 @@ All notable changes to this skill are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and the skill uses
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Changed
+
+- A run that may not ask still writes the three options to close the gaps, one recommended first, into its
+  report, in the quick start of `SKILL.md` and in `references/intake.md`. From scoring the agent evals of 0.2.0.
+
+### Added
+
+- Provenance entry 52 for that clause.
+
 ## [0.2.0] - 2026-11-08
 
 The flow now answers every kind of report the bridge delivers: a defect, behaviour the app was built with, a

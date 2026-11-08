@@ -69,6 +69,10 @@ produces the wrong-looking result, and write down two or three hypotheses, each 
 would confirm or kill it. The user decides better with those in front of them, and the question carries
 them.
 
+A run that may not ask (unattended, or told not to ask questions) still owes this choice. Write the three
+options with the recommended one first into the report, in place of the question, and stop there: a list of
+what you would need does not let the user decide, and "do not ask" never means picking an option yourself.
+
 ## When the cause is behaviour, not a defect
 
 Sometimes the evidence shows the app doing exactly what it was built to do, and the tenant expecting
@@ -183,7 +187,8 @@ reasoning was theirs. See [reply.md](reply.md).
 - [ ] Screen and its loader located in the code at that version
 - [ ] Sufficiency matrix filled; every gap named
 - [ ] Two or three hypotheses, each with the check that distinguishes it
-- [ ] If gaps remain: the user asked, with the three options and a recommendation
+- [ ] If gaps remain: the user asked, with the three options and a recommendation; in a run that may not
+      ask, the same three in the report
 - [ ] If the cause is behaviour: the user asked to pick a variant, the existing workaround among them
 - [ ] If the capability exists: every entry point, every named edge and every record variant checked in
       the code before the user is asked

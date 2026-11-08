@@ -126,7 +126,8 @@ skill's contract. [adaptation.md](references/adaptation.md) has the table.
 1. Read the issue, its comments and the bridge metadata; fill the sufficiency matrix.
    [intake.md](references/intake.md)
 2. If the matrix has gaps, ask the user how to close them: production read, a question to the reporter, or a
-   fix of the likely causes. [intake.md](references/intake.md)
+   fix of the likely causes, one recommended first. Told not to ask, or working unattended: put those three
+   options and the recommendation in your report, and wait. [intake.md](references/intake.md)
 3. With approval, read production: the report row, attachments, the reporter's timeline, the records it
    names. [evidence.md](references/evidence.md)
 4. Match the evidence against the root-cause table and pick the cause the data distinguishes; if it is

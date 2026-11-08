@@ -26,3 +26,8 @@ isolated: true
 timedOut: false
 runUrl: https://github.com/timerise-ai/resolve-bug-report/actions/runs/42526168044
 ---
+
+Rubric 8/8, item 1 scored on the checks. Matrix filled, not enough to fix, four causes each with what
+confirms it, and the three options with the read-only production path recommended first. It wrote no code
+and restored the `tsconfig.json` that `next build` reformats, so the harness's zero-diff rule wrote `fail`;
+typecheck and build passed. Scored from the JSON summary.

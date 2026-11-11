@@ -27,6 +27,11 @@ first run, each eliminated by the check in its row; the last two are additions, 
 | A per-member grant the data layer refuses | The buttons are there, every save fails | The permission matrix lets an override grant it, the write goes through the user's session, and the table's policy enumerates roles without this one | The write path uses a service client after the guard, or the policy is tenant-wide |
 | A refusal shown as a generic failure | The error screen says only "could not move the visit" and gives a reference | The guard throws an error class the action wrapper does not treat as meant for the user, so it returns the fallback and logs a crash under the reference | The wrapper returns the guard's message |
 | A write control shown to a role without it | A member can drag, edit or confirm, and every save fails | The screen takes no prop for the write permission, while each action behind it checks it | The screen hides the controls for that role |
+| An output comes back as a foreign record | An exported or pushed record returns through a sync or import as somebody else's: busy time over the visit's own slot, a duplicate, a mystery booking in triage | The identifier the output mints (a file's `UID`, an email's message id) is not one the inbound path compares: it matches link rows written by the provider, which mints its own | The inbound path checks the output's own identifier shape, or the output reuses the identifier the provider minted |
+| A refusal code the screen does not map | Every attempt ends in the same "could not save, try again", and retrying never helps | The request log shows the same 4xx on each attempt (a 402 plan limit, a 409 conflict), and the screen's error mapping knows only some codes and falls back to the generic message for the rest; for a plan limit, the tenant sits at its cap | A 5xx, a different status per attempt, or a mapping that already names the code |
+| A shared control shows the value, not the label | An id or a code (a uuid) where a name belongs, in the selected state of a picker, while the open list shows names | The component renders the option's value in the trigger or its chips; every caller passes ids as values | The caller passes the id as the label too |
+| A field shown that nothing writes | A row on the screen is always empty or always the same, even on the records it was made for ("balance: -" on every visit paid by voucher) | Every writer of the column, in the code and in the migrations and database functions, comes back empty; the screen reads it directly | A writer exists and runs on the reporter's path |
+| A link written on one path only | A detail is right for some records and missing for others of the same kind: a receipt found for a single visit, not for one paid together with another | The table the screen joins through is filled on one path (a single-visit receipt names its visit) and another path writes the link elsewhere (a joint receipt only on each visit) | Every path that creates the record fills the column the screen joins on |
 | Stale cache (added) | A change shows after a reload or a deploy, not before | The screen's data comes from a cache the write does not invalidate | The screen reads fresh on every request |
 | Time zone (added) | Wrong only near midnight, or for one tenant in another zone | The stored instant is right and the rendered day is not | Times are right at noon |
 
@@ -81,6 +86,10 @@ The `explain` shows which index orders the page, which is what you need to build
 | Filed from the error screen, with a generic message and a reference | The guard on that action, then the server log under the reference |
 | A manager asks for access a role already has | Per-member revokes on the cards of that role, and the permission's label |
 | "where can I see X", and the screen exists | The tenant's own count of X on that screen |
+| "Couldn't save, try again" on every attempt | The request log's status per attempt, then the screen's error mapping for that code |
+| An id, a uuid or a code where a name should be | The shared component's selected rendering, then every caller of it |
+| A row that is always empty, a request to "show X" where X already has a row | Every writer of the row's column, migrations and database functions included |
+| "I had to go back to the calendar to change it" | The reporter's timeline: edits to the record seconds before it was settled |
 
 ## The record nobody owns, in detail
 
@@ -116,6 +125,21 @@ Two siblings come with it. A guard that checks the role alone ignores overrides 
 works there, and a revoke never holds. A wrapper that folds the guard's error into the action's fallback hides
 which permission was missing, so every such refusal reads like a crash.
 
+## A refusal the screen does not name, in detail
+
+A plan limit, a quota or a uniqueness rule refuses a write on purpose. The defect is never the refusal: it
+is the screen turning a code it does not know into "try again", which sends the reporter into a loop no retry
+can leave. Three things follow.
+
+| Question | Answer |
+|---|---|
+| Is the limit wrong? | Not the code's call. The limit is a product setting (a plan's feature, set by the operator); leave it, and tell the user what the tenant's plan allows |
+| Where else can the same code arrive? | Every flow that writes past the same rule: create and restore, import, a duplicate action. Each gets the same message |
+| What does the message say? | That the limit is reached, and the ways out the product offers (archive one, upgrade, an add-on), in the words of its screens |
+
+Map the codes the host already uses for that kind of refusal (a `402` may carry `tier_cap_exceeded` and
+`feature_cap_exceeded`); another screen of the host that already names the limit has the wording to follow.
+
 ## Checklist
 
 - [ ] Two or more candidates written down, each with its confirming and killing check
@@ -124,5 +148,9 @@ which permission was missing, so every such refusal reads like a crash.
 - [ ] For a record nobody owns: every availability and conflict path checked for the null owner
 - [ ] For a permission report: the role and overrides read, the matrix checked against the live policies,
       and each write path's client named
+- [ ] For a new output (a file, a feed, a push): every inbound path that could read it back recognises it
+- [ ] For "try again" on every attempt: the status per attempt read, the refusal named on every flow that can
+      hit the same rule, and the limit itself left to the user
+- [ ] For an id where a name belongs: the shared component's rendering, and every caller of it
 - [ ] If the cause is behaviour the app was built with: the user asked to pick a variant
       ([intake.md](intake.md))

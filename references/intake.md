@@ -35,6 +35,15 @@ URL, and the screenshot is evidence, often more than the description. Marks draw
 should be, a line under a header) show the layout the reporter wants. The signed URL stays out of the reply
 and the commit.
 
+An image pasted into an issue in a private GitHub repository is a `user-attachments` URL that answers 404 to
+a plain download. Fetch it with the CLI's token and read the file:
+
+```bash
+# run anywhere; saves one screenshot of a private-repository issue
+curl -sL -H "Authorization: token $(gh auth token)" -o shot.png \
+  https://github.com/user-attachments/assets/<asset id>
+```
+
 ## The sufficiency matrix
 
 Fill one row per item. Every "no" is a gap to close before writing code.
@@ -181,6 +190,68 @@ rules". That is their product decision, not a claim the code can prove. Carry it
 screen's words, check that the screen and its label exist, and say in the report back to the user that the
 reasoning was theirs. See [reply.md](reply.md).
 
+## When a teammate has built it and asks for a review
+
+A member of the product team may get to a request first: their comment on the report names a commit on a
+preview branch, lists what they checked and asks a few questions before anyone answers the reporter. The run
+becomes a review, and the flow still ends in the reply.
+
+| Step | What it settles |
+|---|---|
+| Read the commit at its hash, not the branch tip, and every file it touches | The review covers what they built, not what landed after |
+| Answer each question they asked with the line of code that settles it | They asked those because they were unsure; an answer without the line is another opinion |
+| Re-run each check they say passed, and list the ones they say they did not run | A claim in a comment is a claim; "not opened in Google or Outlook" stays open until somebody does |
+| Follow everything that leaves the app (a file, a feed, an email, a push) back in through every inbound path that could read it again: a sync, an import, deduplication, echo suppression | The identifiers the new output mints must be ones the inbound path recognises ([root-causes.md](root-causes.md)) |
+| Read the integration next door for the defects the sweep looks for anyway | Checking one question often walks through code with a capped read of its own |
+
+A defect the review finds is fixed on the same branch in its own commit after theirs, with its own guard and
+`Refs #N`, never folded into their commit. The answers go on the thread as an ordinary comment to the
+teammate, in the language they wrote in, without the reply prefix: they may name files and commits, the
+reporter never sees them. The reply to the reporter is separate and waits for the deploy
+([reply.md](reply.md)). When the user asks for the review only, post nothing and report the answers.
+
+## When a teammate has already answered it
+
+The thread may already hold a reply from the team: a request answered as noted for later, with a question to
+the reporter. The run is then a claim check on that reply, not a second answer.
+
+| Check | What it settles |
+|---|---|
+| Every label, menu and role the reply names, against the code at the current version | Whether a correction is owed ([reply.md](reply.md)) |
+| The layer that holds the rule the reply states ("only the owner or a manager"): the server action and the database function or policy | Whether the rule holds when the screen is bypassed; a rule held only in the screen is a defect |
+| Whether the reporter answered the reply's question | Whether there is anything to act on yet |
+| Whether a per-member grant could give the reporter what they ask | A workaround the reply could have named |
+
+When the reply holds and waits on the reporter, recommend waiting and post nothing; the reporter's answer
+arrives on the thread through the bridge.
+
+## When a tester filed it, without a bridge
+
+A report can come from the product's own QA: an issue opened by hand on the tracker, a title, a sentence and
+two screenshots, and no metadata table. Nothing names the tenant, the role or the app version, but three
+things stand in for them:
+
+| Bridge field | What stands in |
+|---|---|
+| Created at | The issue's own `createdAt`; the tester filed it minutes after the attempts |
+| Page and action | The screenshot: the dialog, its title and the error under the button name the screen and its API route |
+| What happened | The platform's request log on that route in the window before filing: the status of every attempt ([evidence.md](evidence.md)) |
+
+The request log often settles the cause before any database read: the same 4xx on every attempt is a rule
+refusing, not a save failing, and the code names the rule. The reporter is a colleague, so the reply is a
+short memo on the thread, not a `/reply`, and the issue usually stays open for the tester's own check after
+the deploy: commit with `Refs #N` and leave the closing to them ([reply.md](reply.md),
+[adaptation.md](adaptation.md)). Read the user's instructions for that policy; "do not close it, QA
+reviews" is common and overrides the closing keyword.
+
+## One report, several defects
+
+A tester's report often lists two unrelated things on one screen: an error on save and a wrong label in a
+picker. Treat each as its own report inside the issue: a sufficiency row each, a cause each, a guard each.
+They rarely share a cause, and a fix found for the first does not explain the second. One change may carry
+both when both are small; the commit body and the reply number them in the order the reporter wrote them, so
+each is answered.
+
 ## Checklist
 
 - [ ] Issue, comments and metadata read; app version noted
@@ -198,3 +269,10 @@ reasoning was theirs. See [reply.md](reply.md).
       field checked for a defect it already has
 - [ ] If the account's setup may be the cause: role and overrides at filing and now, the member's record's
       writes after the report, and the reporter's screen as their role
+- [ ] If a tester filed it without a bridge: `createdAt`, the screenshot's screen and the request log stand
+      in for the metadata; the closing policy read from the user's instructions
+- [ ] Several defects in one report: a row, a cause and a guard each, answered in the reporter's order
+- [ ] If a teammate already answered: every claim of their reply checked, the rule's enforcing layer read,
+      and nothing posted while it waits on the reporter
+- [ ] If a teammate built it: the commit read at its hash, each question answered with its line, their checks
+      re-run, every output followed back through the inbound paths, and the answers kept off the reply prefix

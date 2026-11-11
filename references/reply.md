@@ -62,6 +62,8 @@ them and trace each to the code or the running app. A claim that has not been tr
 | "Switch X back to Default" | The card's control and its option labels as they read in production today; a label renamed in an unreleased commit is named as the new one coming with the update |
 | "The screen is empty because" | The tenant's own count on that screen, and that the other system does not sync those records |
 | "Your existing records move over", "identical ones are merged into one" | The migration's step run on local data, and the rule it merges by, named in the screen's fields |
+| "Resolved via #<pull request>, merged" | `gh pr view <number> --json state,mergeCommit`: merged, and into the branch the memo names |
+| "The limit is reached", "your plan includes one" | The plan's setting the refusal read and the tenant's count, never the label on the plan's marketing page |
 
 The cheapest moment to find a defect is while checking a reply. A scope claim that fails its check is often a
 sibling defect in a path nobody looked at: stop, tell the user, and fix it before the correction goes out.
@@ -232,6 +234,71 @@ To find the cause we need a few details:
 We will get back to you as soon as we have them.
 ```
 
+## Template, a memo for a tester
+
+When the reporter is the product's own tester ([intake.md](intake.md)), the answer is an ordinary comment
+on the thread, without the reply prefix: they may read pull request numbers and branch names, they will
+check the fix by hand, and the issue stays open for that check unless the user says otherwise. Keep it to a
+memo: what was wrong per item, what changed, how to check it.
+
+```bash
+# run in the app repository; a plain comment, no reply prefix
+gh issue comment <number> -R <owner>/<repo> --body-file - <<'EOF'
+Resolved via #<pull request> (merged to `<branch>`, <what makes it live>). Leaving this open for QA review.
+
+**1. <the first thing they reported, in their words>.** <The cause in the screen's terms: "the app refused a
+second location because the plan includes one, and the dialog said try again instead of why">. It now
+<what the screen does>. <What the tenant can do: archive one, upgrade, an add-on>.
+
+**2. <the second thing>.** <Cause and fix, one or two sentences>.
+
+**To check on staging:**
+- <screen> -> <action> -> <what they should see>
+- <screen> -> <action> -> <what they should see>
+EOF
+```
+
+Number the items in the order they reported them, one per defect, and give each check as a path through the
+screens they will click. The limit itself, when the cause is a refusal, is stated as the product's rule with
+the ways out, not as a defect.
+
+## When the merge is part of the same run
+
+The user may ask for everything at once: review, reply, merge, push, close. The reply says when the fix is
+live, so the order is merge and push, wait for the production deploy to report success, post the reply, then
+close. Once the deploy has succeeded the reply can say "available now, refresh the page if you do not see it"
+instead of "after the next update".
+
+```bash
+# run in the app repository; prints the production deploy's state for the merge commit
+sha=$(git rev-parse <merge commit>)
+url=$(gh api "repos/<owner>/<repo>/deployments?sha=$sha" \
+  --jq '[.[] | select(.environment | test("production"; "i"))][0].statuses_url')
+gh api "$url" --jq '.[0].state'   # success, failure, error, or pending while it builds
+```
+
+A host that does not report deploys to the tracker has its own status command in the branch-and-deploy seam
+([adaptation.md](adaptation.md)); with neither, the reply keeps "after the next update".
+
+Closing by hand before the reporter confirms is the user's call. The reply still asks them to confirm, the
+bridge mirrors the close and later comments, and the report back to the user says the issue may need
+reopening if the answer is "still wrong".
+
+## Closing several resolved issues on request
+
+Asked to close "the resolved ones", decide each open report on what its thread and the history show, not on
+its age:
+
+| State | Close |
+|---|---|
+| A commit that references it reached the default branch, the production deploy succeeded, the reply was sent | Yes, even when the reply said "after the next update": that update is now live |
+| A how-to or setup reply with nothing left on the team's side | Yes |
+| The reply asked the reporter for something (a code, an example) and no answer came | No |
+| Noted for later, or no reply at all | No |
+| A report outside the bridge (a website task, a tester's issue) | Leave it to its owner |
+
+Report what was closed and why each other one stays open.
+
 ## After posting
 
 Tell the user the comment's URL, what the reply said in one line, and what is still pending on their side:
@@ -251,4 +318,9 @@ the deploy that makes the fix live, and the issue closing when the commit reache
 - [ ] For the account's setup: the role then and now from the data, what to do now, and to an admin the cards
       to change with labels as production shows them
 - [ ] No internals, no other tenant's data
+- [ ] "Available now" only after the production deploy reported success; otherwise "after the next update"
+- [ ] A review for a teammate posted as a plain comment, never under the reply prefix
+- [ ] A memo for a tester: a plain comment, one numbered item per defect, a check per item, the issue left
+      open unless the user said to close it
+- [ ] Issues closed on request only when their fix is live or nothing is left on the team's side
 - [ ] The user told the URL and what is still pending

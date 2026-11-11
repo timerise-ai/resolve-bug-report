@@ -30,6 +30,14 @@ Classify each hit. For a capped read the classes are:
 A storefront or public path that uses the same rule as the screen in the report usually has the same defect,
 and the reporter never saw it. Fix it in the same change.
 
+When the defect sits in a shared component (a picker that shows the value instead of the label), the sweep is
+every caller of it, and the fix goes in the component. Before changing what it renders, read why it renders
+that: `git log -L '/<the line>/,+1:<component file>'` names the commit, and a caller may rely on the old
+output on purpose (compact codes such as `en` and `pl` in a language picker). Keep that caller's output
+through a field the component already has (an option's short form), not a new prop: a new prop is a second
+way to say the same thing, and the next caller picks the wrong one. A run that added a prop first had to undo
+it once the existing field turned up.
+
 ## Page the read
 
 Use the host's paging helper if it has one. If it does not, this one pages until a short page proves the end,
@@ -188,6 +196,16 @@ receipt, one payer), and refuses a requested id that did not come back from the 
 another tenant's id simply returns nothing. A test file for a module that did not exist fails on the old code
 by construction; the running app is where fail then pass is shown.
 
+A control added to a second screen for an action another screen already performs goes through that action,
+not a new write path: the payment window that now changes a visit's service calls the calendar editor's own
+action, so the qualified-person, package and collision checks are the same ones. When the new control feeds a
+dependent step (save the service, then take the payment), save first, let a refusal stop the dependent step,
+and remember what was saved so a retry after a refused payment does not save it twice.
+
+A guard written for an earlier report may scan for a literal form (`{open && <Body` on one line, a word limit
+on a help article). A formatter or a new prop that splits the line fails it; keep the form it scans for, and
+treat the failure as the guard doing its job.
+
 Commit new behaviour as `feat`, a corrected one as `fix`; both carry `Fixes #<number>`.
 
 ## When the defect is in permissions
@@ -267,6 +285,16 @@ file under the watcher), and touching the file may not wake it. Render the suspe
 one request, compare it with the source, and when they differ ask the user before restarting their dev
 server. Remove the probe afterwards.
 
+Before reading any screen, confirm the server on the port is this repository's: `lsof -p <pid> | grep cwd`
+for the process `lsof -iTCP:<port> -sTCP:LISTEN` names. A dev server of another project on the expected
+port answers every path with a redirect and a 404, which reads like a routing defect in the host. Start this
+repository's server on a free port instead of stopping the user's other one, and stop yours when done.
+
+A new file format nobody on the team has opened (an iCalendar export, a CSV for a spreadsheet) is parsed with
+an independent library in the scratchpad before anyone says it works: the folding, the escaping and the
+non-ASCII text round-trip, every line within the format's limits. That proves the format, not the consumer
+applications; list those as not yet opened in the report and in any review comment.
+
 For a list ordered by name, seed filler names that sort first (`Aaa Repro 0001` onwards, past the cap) and one
 target that sorts last, then search the picker for the target as the reporter's role. For a visibility fix,
 change a seeded member's setting locally (a job function, an archived flag) and give it one record on the day
@@ -295,6 +323,55 @@ where table_schema = 'public' and column_name = 'sale_id';
 
 Delete those rows, then the record, then restore the seeded visits' status, in one transaction. A seeded row
 you updated rather than inserted is cleanup too: put back the value you read before changing it.
+
+### A refusal that depends on a configured limit
+
+A plan limit, a quota or a feature flag is usually unset in the seed, so the old code never refuses locally.
+Set it for the run and put it back:
+
+```bash
+# run in the app repository, against the LOCAL database only
+psql "$LOCAL_DB_URL" -At -c "select features from plans where code = '<plan>'" > scratch/plan-before.json
+psql "$LOCAL_DB_URL" -c "update plans set features = features || '{\"max_locations\": 2}' \
+  where code = '<plan>'"
+# ... reproduce on the old code and the new ...
+psql "$LOCAL_DB_URL" -c "update plans set features = features - 'max_locations' where code = '<plan>'"
+diff <(psql "$LOCAL_DB_URL" -At -c "select features from plans where code = '<plan>'") \
+  scratch/plan-before.json && echo restored
+```
+
+Set the limit to the tenant's current count, so the next write is the one refused, and confirm the request
+in the running app returns the refusal's status before reading the screen. Restore with the inverse
+statement, then compare with the saved copy: an empty diff is the proof the seed is as it was.
+
+A money path is reproduced through the screen with its defaults, not by calling the action: a default the
+screen applies (the client's other visits of the day ticked onto the same receipt) produces records the unit
+tests never built. In one run the drawer's new voucher row came back empty after a real payment, because the
+screen had settled two visits on one receipt and a joint receipt links its visits only through a column on
+each visit, which the loader did not read.
+
+Such a repro writes across many tables (a sale, its lines, payments, the voucher ledger, commissions, a fiscal
+job, audit rows). Note the database clock and snapshot the rows it will update before the run, then list every
+table that gained rows, and undo them in one transaction, children before parents:
+
+```sql
+-- run on the local database only: every table with rows created since the snapshot
+do $$
+declare t record; n bigint;
+begin
+  for t in select c.table_name from information_schema.columns c
+             join information_schema.tables x on x.table_name = c.table_name
+              and x.table_schema = 'public' and x.table_type = 'BASE TABLE'
+            where c.table_schema = 'public' and c.column_name = 'created_at' loop
+    execute format('select count(*) from public.%I where created_at > %L', t.table_name, '<snapshot time>')
+      into n;
+    if n > 0 then raise notice '% %', t.table_name, n; end if;
+  end loop;
+end $$;
+```
+
+Rows the run updated rather than created (a visit's status, a voucher's balance) come back from the snapshot,
+or from the old values the audit rows of the run recorded.
 
 ## Proving a fix below the screen
 
@@ -365,6 +442,12 @@ comparison read the same data, and the repro looks like a fix that changed nothi
 variable and passed to `git stash push`: zsh hands it over as one path, nothing is stashed, and the "old
 code" run is the new code. Write the paths out.
 
+Seeding many rows by copying one existing row (`insert ... select` from `to_jsonb(row)` with a new id and a
+shifted time) fails on a generated column; list the insertable columns from `information_schema.columns`
+where `is_generated = 'NEVER'`. Run a multi-statement seed in one transaction: `psql` commits each statement
+on its own, so a later failure leaves the earlier rows (an account, a connection) behind, and the next attempt
+seeds on top of them. Clear the jobs a seed's triggers enqueued along with the rows.
+
 ## Commit and push
 
 - Stage the changed files by path; one commit for the fix, its siblings and the guard.
@@ -373,9 +456,20 @@ code" run is the new code. Write the paths out.
   `Fixes #<number>`.
 - `Fixes #N` closes the issue only when the commit reaches the default branch. On a preview or release
   branch the issue stays open until the merge; tell the user.
+- A defect found while reviewing a teammate's build goes in its own commit after theirs, with `Refs #N`: the
+  user closes the issue once the reporter is answered, and their commit keeps its own message.
 - A defect fixed inside a report that stays open (a request noted for later) is committed with `Refs #N`, not
   `Fixes #N`, so the merge does not close the request; label the issue as the host's request label.
-- No tool attribution in the message. Check `git log -1 --format=%B` before pushing.
+- No tool attribution in the message, the pull request body or a comment. Check `git log -1 --format=%B`
+  before pushing, and `gh pr view <number> --json body -q .body` after opening a pull request: a harness
+  may append a "Generated with" line to the body, which the commit check never sees.
+- A host whose testers check every fix by hand keeps the issue open after the merge: `Refs #N` in the commit
+  and the pull request, never `Fixes`, `Closes` or `Resolves` anywhere in them.
+- Two changes in one working tree that share files (two reports resolved one after the other) still go in
+  two commits. Interactive staging is not available to an agent, so stage each commit's version of a shared
+  file as a blob: write the file without the other change's hunks, `git hash-object -w --stdin` it and
+  `git update-index --cacheinfo 100644,<sha>,<path>`. Then prove the staged commit alone:
+  `git stash push --keep-index --include-untracked`, type-check and run the suite, `git stash pop`.
 - Run the whole suite before every push, not the folders you touched: a guard over the help text or the docs
   (a word limit, a label check) lives in another folder and fails only in a full run, by then on a pushed
   commit. A test that fails on the old code as well is not yours: run it there, name it in the report, and
@@ -395,11 +489,18 @@ code" run is the new code. Write the paths out.
 - [ ] Whole suite and linter green before every push; a failure that also fails on the old code named, not
       fixed
 - [ ] A migration that rewrites rows proven in a rolled-back transaction, then applied without a reset
+- [ ] The server on the port is this repository's; a new file format parsed by an independent library
+- [ ] A money path reproduced through the screen with its defaults; every table it wrote listed and undone,
+      updated rows restored from the snapshot
+- [ ] Two changes sharing files split into two commits, the first proven alone with the second stashed
 - [ ] Every seed insert confirmed; running app wrong on the old code, right on the new; seeded data removed
 - [ ] A rule below the screen proven against local data on both codes; a database function in a rolled-back
       transaction
 - [ ] Existing tests that encoded the old behaviour changed and named
 - [ ] For a permission defect: the refusal names the permission, the matrix is held against the live policies,
       and the screen is checked as a role without the write and as one with it
-- [ ] Commit with `Fixes #N` (or `Refs #N` when the report stays open), no attribution, pushed per the branch
-      policy; the default branch merged only when asked
+- [ ] A shared component fixed in the component, every caller checked, a deliberate caller kept through an
+      existing field
+- [ ] A limit set for a repro restored and checked
+- [ ] Commit with `Fixes #N` (or `Refs #N` when the report stays open), no attribution in the commit, the
+      pull request body or a comment, pushed per the branch policy; the default branch merged only when asked

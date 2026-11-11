@@ -4,6 +4,64 @@ All notable changes to this skill are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and the skill uses
 [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+From an eighth recorded session: a request a teammate had built on a preview branch, reviewed before the
+reporter was answered.
+
+From a ninth recorded session: a report the product's own tester filed by hand, two defects on one screen,
+settled from the platform's request log, merged, and answered with a memo that left the issue open.
+
+From a tenth recorded session: five requests from one member, three of them built from what the timeline
+showed the member doing by hand.
+
+### Added
+
+- A teammate's build to review before the reply, in `references/intake.md`: read the commit at its hash,
+  answer each question with its line, re-run their checks, follow every output back in through the inbound
+  paths, and keep the answers off the reply prefix.
+- An output that comes back as a foreign record as a confirmed cause in `references/root-causes.md`.
+- In `references/fix-and-verify.md`: confirming the server on the port is this repository's, parsing a new
+  file format with an independent library, seeding by copied rows without generated columns and in one
+  transaction, and a defect found in a review committed after the teammate's with `Refs #N`.
+- In `references/reply.md`: the order when the merge is part of the same run, the deploy status check before
+  "available now", and closing before the reporter confirms; the deploy status in the branch-and-deploy seam
+  of `references/adaptation.md`.
+- Provenance entries 26 to 29, 56 to 58 and 67 for the eighth session.
+
+- A tester's report without a bridge and one report with several defects, in `references/intake.md`, with the
+  command that downloads a screenshot from a private repository's issue.
+- The platform's request log as evidence in `references/evidence.md`: every attempt's status on the screen's
+  route before filing, and what each pattern says; a request-log seam in `references/adaptation.md`.
+- Two confirmed causes in `references/root-causes.md`, a refusal code the screen does not map (a plan limit
+  shown as "try again") and a shared control that shows the value instead of the label, with their signs and
+  a section on a refusal the screen does not name.
+- In `references/fix-and-verify.md`: sweeping every caller of a shared component and keeping a deliberate
+  caller through an existing field, reproducing a refusal behind a configured limit and restoring it, and
+  `Refs #N` everywhere when testers close issues themselves.
+- A memo template for a tester in `references/reply.md`, with claim checks for "resolved via" and for a
+  limit.
+- Provenance entries 30 to 35, 59 and 68, renumbering the ledger to 68 entries.
+
+- The reporter's detour in the timeline, edits to a record seconds before it is settled, and a settlement
+  just before the report that does not match the title, in `references/evidence.md`.
+- Two confirmed causes in `references/root-causes.md`, a field shown that nothing writes and a link written on
+  one path only, with their signs.
+- A report a teammate already answered, in `references/intake.md`: check every claim of the reply and the
+  layer that enforces its rule, and wait when it waits on the reporter.
+- In `references/fix-and-verify.md`: a new control goes through the action another screen already uses, a
+  guard from an earlier report keeps its literal form, a money path reproduced through the screen with its
+  defaults, the cleanup query that lists every table a repro wrote, and two changes sharing files split into
+  two commits by staged blobs, the first proven alone.
+- Closing several resolved issues on request, in `references/reply.md`.
+- Provenance entries 36 to 40, 65 to 67 and 77, renumbering the ledger to 77 entries.
+
+### Changed
+
+- The sixth hard rule, the README's non-negotiables and `references/adaptation.md` name pull requests and
+  comments beside commits: none carries tool attribution, and the pull request body is read back after it
+  is opened.
+
 ## [0.2.1] - 2026-11-08
 
 From scoring the prompt-1 agent evals of 0.2.0.

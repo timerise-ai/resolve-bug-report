@@ -3,28 +3,30 @@ name: resolve-bug-report
 description: >
   Resolve one bug report that a customer or tenant member filed through an in-app reporting bridge into an
   issue tracker: read the issue and the bridge metadata, decide whether there is enough to act on, rebuild
-  what the reporter did from production data read only, fix the root cause and every sibling of it, prove
-  the fix fails on the old code and passes on the new one in the running app, commit with the closing
-  keyword, and answer the reporter through the bridge in plain language with a request to confirm. Use when:
-  (1) the user hands over an issue number or URL of a report a customer filed, (2) a report has a title and
-  an empty or thin description, (3) the user asks to check whether there is enough information before
-  fixing, (4) the user asks to reply to the reporter once it is fixed, (5) the evidence shows the app
-  working as built and the fix is a product decision, (6) the report asks for something the app already
-  has and the answer is a how-to, (7) the report asks for a feature the app does not have and the reporter
-  needs an answer now, built or not, (8) a reply already sent was wrong and needs a correction, (9) the user
-  mentions: resolve issue, fix issue #, tenant-report label, customer bug report, "check if you have
-  everything you need", /reply, leave a reply for the reporter, ask the reporter to confirm, audit log,
-  production read only, supabase db query --remote --read-only, PostgREST max_rows, 1000-row cap, "Fixes #",
-  "settled separately instead of together", "it already exists", "for the whole salon", "can it be done",
-  feature request, feature freeze, out of scope, "only clients starting with A", "explain where the list is",
-  "I am at reception and cannot settle", wrong role, permission override, "could not move the visit".
-  Carries a sufficiency matrix, a read-only production protocol with the user's approval, a reporter
-  timeline query, a root-cause table with the check that tells each cause apart, the variants to put to the
-  user when the cause is behaviour, a guard test that fails on the old code, a claim check before any reply,
-  and reply templates for a fix, a how-to, a feature not built now, the account's setup and a correction.
-  Any git repository with the gh CLI and a Postgres backed multi-tenant app; the tracker, the reply channel,
-  production access and the app's verify procedure are the seams. Not the bridge itself, not bulk triage,
-  not outage response.
+  what the reporter did from production data read only, fix the root cause and every sibling of it, prove the
+  fix fails on the old code and passes on the new one in the running app, commit with the closing keyword, and
+  answer the reporter through the bridge in plain language with a request to confirm. Use when: (1) the user
+  hands over an issue number or URL of a report a customer filed, (2) a report has a title and an empty or
+  thin description, (3) the user asks to check whether there is enough information before fixing, (4) the user
+  asks to reply to the reporter once it is fixed, (5) the evidence shows the app working as built and the fix
+  is a product decision, (6) the report asks for something the app already has and the answer is a how-to, (7)
+  the report asks for a feature the app does not have and the reporter needs an answer now, built or not, (8)
+  a reply already sent was wrong and needs a correction, (9) a teammate built the request and asks for a
+  review before the reporter is answered, (10) a tester filed it by hand without bridge metadata, or one
+  report holds several defects, (11) the user mentions: resolve issue, fix issue #, tenant-report label,
+  customer bug report, "check if you have everything you need", /reply, leave a reply for the reporter, ask
+  the reporter to confirm, audit log, production read only, supabase db query --remote --read-only, PostgREST
+  max_rows, 1000-row cap, "Fixes #", "settled separately instead of together", "it already exists", "for the
+  whole salon", "can it be done", feature request, feature freeze, out of scope, "only clients starting with
+  A", "explain where the list is", "I am at reception and cannot settle", wrong role, permission override,
+  "could not move the visit", "check this before I answer the salon", export, iCal, comes back as busy,
+  "Couldn't save. Try again", 402, plan limit, uuid in a picker, request log, open for QA. Carries a
+  sufficiency matrix, a read-only production protocol with the user's approval, a reporter timeline query, a
+  root-cause table with the check that tells each cause apart, the variants to put to the user when the cause
+  is behaviour, a guard test that fails on the old code, a claim check before any reply, and reply templates
+  for a fix, a how-to, a feature not built now, the account's setup and a correction. Any git repository with
+  the gh CLI and a Postgres backed multi-tenant app; the tracker, the reply channel, production access and the
+  app's verify procedure are the seams. Not the bridge itself, not bulk triage, not outage response.
 ---
 
 # Resolve a bug report
@@ -118,8 +120,8 @@ skill's contract. [adaptation.md](references/adaptation.md) has the table.
 > tenants' data, with every claim checked against the code, and ask for confirmation.** A wrong reply is
 > corrected by a new one.
 
-> **Outward acts only as asked.** Push and reply when the user asked for them; commits carry no tool
-> attribution.
+> **Outward acts only as asked.** Push and reply when the user asked for them; commits, pull requests and
+> comments carry no tool attribution.
 
 ## Quick start
 
@@ -148,11 +150,11 @@ skill's contract. [adaptation.md](references/adaptation.md) has the table.
 
 | Scenario | Trigger keywords | Reference |
 |---|---|---|
-| Reading the report, deciding if it is enough | issue view, empty body, no description, metadata table, page path, app version, sufficiency, missing information, product decision, variants, workaround, already exists, entry points, how-to, feature request, new feature, readers of the field, feature freeze, out of scope, proposed how-to, finish the task, defect inside a request, wrong role, account setup, several reports, error screen, empty screen, attachment behind a login, signed-in browser, below the fold, viewport, variant changed mid-work, full build, product questions, readers hide a defect | [intake.md](references/intake.md) |
-| Reading production safely | read only, supabase db query --remote, audit_log, timeline, to_jsonb, information_schema, actor_id, attachments, untrusted data, permission denied, burst of writes, records behind the writes, member's role, overrides, pg_policies, settings after the report | [evidence.md](references/evidence.md) |
-| Naming the cause | wrong list, missing employee, everyone shown, max_rows, 1000 rows, truncated, fallback, sync overwrote, archived, filtered out, cache, separate receipts, one per record, portal import, missing group, whole salon, for everyone, null owner, salon-wide, name order, only A, default filter, hidden column, export ignores the period, wrong role, revoke, grant refused, RLS role list, generic error, read-only, .in ids | [root-causes.md](references/root-causes.md) |
-| Fixing, testing, reproducing, committing | sibling sweep, guard test, fetchAllRows, range, repro, Playwright, git stash, Fixes #, default branch, push, new behaviour, pure module, client-supplied ids, exclusion constraint, cleanup, git stash push, server loader, database function, rolled-back transaction, Refs #, merge to main, limit on purpose, tests that encode old behaviour, download body empty, fetchAllByIds, policy probe, refusal by name, read-only screen, two roles, shell function, stale dev server, runtime value, data migration, merge copies, seed in a transaction, whole suite before push, fails on old code too | [fix-and-verify.md](references/fix-and-verify.md) |
-| Answering the reporter | /reply, reply template, confirm, plain language, reporter's language, ask for details, behaviour change, opt out, check every claim, how-to, correction, wrong reply, not now, noted for later, quote, trade-off, earlier replies, collapsed label, toggle not saved, view that cannot act, account setup, role changed, name the cards, feature built, existing data moved, defect fixed on the way | [reply.md](references/reply.md) |
+| Reading the report, deciding if it is enough | issue view, empty body, no description, metadata table, page path, app version, sufficiency, missing information, product decision, variants, workaround, already exists, entry points, how-to, feature request, new feature, readers of the field, feature freeze, out of scope, proposed how-to, finish the task, defect inside a request, wrong role, account setup, several reports, error screen, empty screen, attachment behind a login, signed-in browser, below the fold, viewport, variant changed mid-work, full build, product questions, readers hide a defect, teammate built it, review before reply, preview commit, questions in a comment, tester, QA, no bridge, screenshots only, private attachment, several defects in one report, already answered, teammate reply, wait for the reporter | [intake.md](references/intake.md) |
+| Reading production safely | read only, supabase db query --remote, audit_log, timeline, to_jsonb, information_schema, actor_id, attachments, untrusted data, permission denied, burst of writes, records behind the writes, member's role, overrides, pg_policies, settings after the report, request log, vercel logs requests, status per attempt, 4xx every time, detour, edited before settling, example in the title | [evidence.md](references/evidence.md) |
+| Naming the cause | wrong list, missing employee, everyone shown, max_rows, 1000 rows, truncated, fallback, sync overwrote, archived, filtered out, cache, separate receipts, one per record, portal import, missing group, whole salon, for everyone, null owner, salon-wide, name order, only A, default filter, hidden column, export ignores the period, wrong role, revoke, grant refused, RLS role list, generic error, read-only, .in ids, export comes back, echo, UID, import, foreign busy, try again every time, 402, plan limit, error mapping, uuid in a picker, value instead of label, shared component, always empty, nothing writes, one path only, joint receipt | [root-causes.md](references/root-causes.md) |
+| Fixing, testing, reproducing, committing | sibling sweep, guard test, fetchAllRows, range, repro, Playwright, git stash, Fixes #, default branch, push, new behaviour, pure module, client-supplied ids, exclusion constraint, cleanup, git stash push, server loader, database function, rolled-back transaction, Refs #, merge to main, limit on purpose, tests that encode old behaviour, download body empty, fetchAllByIds, policy probe, refusal by name, read-only screen, two roles, shell function, stale dev server, runtime value, data migration, merge copies, seed in a transaction, whole suite before push, fails on old code too, wrong server on the port, generated column, independent parser, file format, shared component callers, git log -L, existing field not a new prop, configured limit, restore the seed, PR body attribution, Refs for QA, reuse the action, money path, screen defaults, cleanup query, two commits shared files, update-index, keep-index | [fix-and-verify.md](references/fix-and-verify.md) |
+| Answering the reporter | /reply, reply template, confirm, plain language, reporter's language, ask for details, behaviour change, opt out, check every claim, how-to, correction, wrong reply, not now, noted for later, quote, trade-off, earlier replies, collapsed label, toggle not saved, view that cannot act, account setup, role changed, name the cards, feature built, existing data moved, defect fixed on the way, deploy status, available now, close before confirm, review comment, memo for a tester, leave open for QA, Resolved via, numbered items, check on staging, close the resolved ones, batch close | [reply.md](references/reply.md) |
 | Fitting the flow to the host | Linear, Jira, GitHub, psql, replica, verify skill, branch policy, rename, commercial terms, feature freeze, labels | [adaptation.md](references/adaptation.md) |
 | Why the flow is shaped this way | provenance, kept deliberately, added | [provenance.md](references/provenance.md) |
 

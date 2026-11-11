@@ -54,7 +54,7 @@ mkdir -p ~/.agents/skills
 ln -s ~/.claude/skills/resolve-bug-report ~/.agents/skills/resolve-bug-report
 ```
 
-Update the skill with `git pull` in its directory. The current release is **0.2.1**. See
+Update the skill with `git pull` in its directory. The current release is **0.3.0**. See
 [CHANGELOG.md](CHANGELOG.md).
 
 ## Activation

@@ -6,6 +6,13 @@ All notable changes to this skill are documented here. The format follows
 
 ## [Unreleased]
 
+## [0.3.0] - 2026-11-11
+
+Three more recorded sessions: the flow now reviews a teammate's build or reply before the reporter is
+answered, takes a tester's report without the bridge, reads the platform's request log and the reporter's
+detour as evidence, names five more causes, splits two changes that share files, and closes only what is
+live.
+
 From an eighth recorded session: a request a teammate had built on a preview branch, reviewed before the
 reporter was answered.
 

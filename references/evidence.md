@@ -31,11 +31,16 @@ untrusted part. A small wrapper that prints one JSON row per line keeps long out
 cd /path/to/app
 supabase db query --remote --read-only "$1" 2>&1 | python3 -c "
 import sys, json
-t = sys.stdin.read(); t = t[t.index('{'):]
-d = json.loads(t)
+t = sys.stdin.read(); i = t.find('{')
+if i < 0: print(t); sys.exit()
+d = json.JSONDecoder().raw_decode(t[i:])[0]
 if 'rows' not in d: print(d); sys.exit()
 for r in d['rows']: print(json.dumps(r, ensure_ascii=False))"
 ```
+
+The decoder reads the first JSON value and stops. The CLI may print more after the envelope (an update notice
+on stderr, merged by `2>&1`), and `json.loads` on the whole rest then fails with "Extra data" on every query.
+An error with no envelope at all is printed as it came.
 
 Other hosts: `psql` against a read replica with `default_transaction_read_only=on`, or an admin API with a
 read scope. See [adaptation.md](adaptation.md).
@@ -55,6 +60,10 @@ select to_jsonb(r) from issue_reports r where r.id = '<report id>';
 
 Expect drift: a body column called `body_md`, an audit column called `entity` rather than `entity_type`, a
 soft-delete column that exists on one table and not its neighbour.
+
+The query tool's role is not the app's. A helper the app's own queries call (a function that folds accents
+for search) can answer "permission denied for function" to the query tool. Rewrite the condition with
+built-ins (`ilike`, `lower`) rather than asking for a grant on production.
 
 ## The report row and its attachments
 
@@ -147,6 +156,26 @@ Before answering that a screen already does what was asked, count the tenant's r
 is an answer of its own: the records may be kept in another system that syncs something else (stock levels,
 not the sales behind them), and the reply then says why the screen is empty and how records get onto it.
 
+## The shape of a free-text field
+
+A report that says "found here by its number, not there" often turns on an identifier kept in free text:
+records imported from another system carry their old number in a notes field, and the card the client holds
+still shows it. Read the field's shape without reading its content: replace every digit with one character
+and group.
+
+```sql
+-- run read only: the formats a notes field holds, and how many records use each
+select regexp_replace(notes, '[0-9]', '9', 'g') as shape, count(*)
+from vouchers where tenant_id = '<tenant id>' and notes is not null
+group by 1 order by 2 desc limit 10;
+```
+
+Then measure who the workaround reaches. In one run every one of the tenant's 875 vouchers was imported,
+and 871 of the usable ones had no client assigned, so the screen's "the client's vouchers" shortcut could
+offer none of them: the typed number was the only way in, and the gap was the whole tenant's, not one
+record's. Check too that the old identifier is unique and collides with no current code before a fix
+matches on it.
+
 ## The member's account and the settings around the report
 
 When the title is about what the reporter may do ("I cannot settle", "I have no access to"), read their
@@ -229,6 +258,8 @@ recommend asking the reporter, with the specific question the data could not ans
 - [ ] Reporter timeline read, actors resolved through the member table
 - [ ] A burst of writes before filing traced to the records behind it
 - [ ] The named records and the tenant's scale on the relevant table read
+- [ ] For "found here, not there": the shape of the field one path reads and the other skips, how many
+      records carry the identifier only there, and whether it is unique
 - [ ] For a "may I" report: the member's role and overrides now, and every write to their record before and
       after the report; for a "where is it" report: the tenant's own count of what the screen would show
 - [ ] For "it fails every time" or a report without a bridge: the request log on the screen's route, the

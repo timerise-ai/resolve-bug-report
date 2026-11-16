@@ -32,6 +32,7 @@ first run, each eliminated by the check in its row; the last two are additions, 
 | A shared control shows the value, not the label | An id or a code (a uuid) where a name belongs, in the selected state of a picker, while the open list shows names | The component renders the option's value in the trigger or its chips; every caller passes ids as values | The caller passes the id as the label too |
 | A field shown that nothing writes | A row on the screen is always empty or always the same, even on the records it was made for ("balance: -" on every visit paid by voucher) | Every writer of the column, in the code and in the migrations and database functions, comes back empty; the screen reads it directly | A writer exists and runs on the reporter's path |
 | A link written on one path only | A detail is right for some records and missing for others of the same kind: a receipt found for a single visit, not for one paid together with another | The table the screen joins through is filled on one path (a single-visit receipt names its visit) and another path writes the link elsewhere (a joint receipt only on each visit) | Every path that creates the record fills the column the screen joins on |
+| Two lookups of one record disagree | "I can find it by its number on one screen, not on the other": a list search finds the record, a lookup at the till or in a form answers "not found" | The two paths read different fields: the list matches parts of the code and free text (an imported record's old number kept in its notes), the lookup matches the full current code alone; the tenant's records carry the identifier the reporter typed only in the field the lookup skips | Both paths read the same fields, or the typed value matches no record's fields at all |
 | Stale cache (added) | A change shows after a reload or a deploy, not before | The screen's data comes from a cache the write does not invalidate | The screen reads fresh on every request |
 | Time zone (added) | Wrong only near midnight, or for one tenant in another zone | The stored instant is right and the rendered day is not | Times are right at noon |
 
@@ -90,6 +91,7 @@ The `explain` shows which index orders the page, which is what you need to build
 | An id, a uuid or a code where a name should be | The shared component's selected rendering, then every caller of it |
 | A row that is always empty, a request to "show X" where X already has a row | Every writer of the row's column, migrations and database functions included |
 | "I had to go back to the calendar to change it" | The reporter's timeline: edits to the record seconds before it was settled |
+| "Found it here by its number, not there" | The predicates of both lookups side by side, then the shape of the field only one of them reads |
 
 ## The record nobody owns, in detail
 
@@ -125,6 +127,23 @@ Two siblings come with it. A guard that checks the role alone ignores overrides 
 works there, and a revoke never holds. A wrapper that folds the guard's error into the action's fallback hides
 which permission was missing, so every such refusal reads like a crash.
 
+## Two lookups that disagree, in detail
+
+A list search is built to be generous: parts of a code, any word of the notes, a name. A lookup that draws
+money or attaches a record is built to be exact: one key, one record. Both are right for their job, and a
+report appears when the identifier people hold (the number printed on an imported card) lives only where
+the generous one looks. Copying the list's predicate into the lookup is the wrong fix: a part of a number or
+a word in the notes would then pick a record at the counter.
+
+| Question | Answer |
+|---|---|
+| Where does the identifier live? | In a field the import wrote by hand (notes, a description), in a shape the shape query of [evidence.md](evidence.md) shows |
+| What does the lookup match on? | The current key first; then only the token that follows the old system's name, compared whole after the same normalisation as the key |
+| What if two records answer? | The lookup refuses and asks for the current code; it never guesses |
+| Which other paths look the record up? | Every one in the sweep: the other screens sharing the lookup, a global search, a public balance check |
+
+The lookup's result shows the current code, so the reporter learns it from the screen without a reply.
+
 ## A refusal the screen does not name, in detail
 
 A plan limit, a quota or a uniqueness rule refuses a write on purpose. The defect is never the refusal: it
@@ -152,5 +171,7 @@ Map the codes the host already uses for that kind of refusal (a `402` may carry 
 - [ ] For "try again" on every attempt: the status per attempt read, the refusal named on every flow that can
       hit the same rule, and the limit itself left to the user
 - [ ] For an id where a name belongs: the shared component's rendering, and every caller of it
+- [ ] For two lookups that disagree: both predicates compared, the fallback matched whole and after the
+      current key, ambiguity refused, and every other lookup of the record swept
 - [ ] If the cause is behaviour the app was built with: the user asked to pick a variant
       ([intake.md](intake.md))

@@ -155,6 +155,24 @@ Several reports from one reporter within minutes usually share this cause. Read 
 across all of them, and still answer each report in its own thread: each reporter waits there, and each
 report can lead to a different sibling defect.
 
+## When an older report has the same cause
+
+A cause found today can explain a report the team answered weeks ago with a question that never got an
+answer. In one run a report "found by number on the list, not at the till" was fixed, and an open report
+from the same member a week earlier ("the voucher code does not exist") turned out to be the same defect:
+the earlier reply had asked for the code and promised to correct the visit once the voucher was found.
+
+| Step | What it settles |
+|---|---|
+| List the tenant's open reports and read each thread's last reply | Which ones wait on the reporter, and what the team promised there |
+| Read the older report's timeline with today's cause in hand | Whether its last write before filing fits (a payment taken by card, without a fiscal receipt, minutes before "the code does not exist") |
+| Look for the record the promise needs | Whether the team can keep the promise alone; when many records fit (148 untouched vouchers of the same value), it cannot |
+| Check whether the screen lets the tenant fix it | A correction the app refuses (switching a settled payment to a voucher) stays the team's |
+
+Answer the older report in its own thread once the fix is live: the cause in its terms, the new way in, and
+the one thing the promise still needs from the reporter. It stays open until that arrives
+([reply.md](reply.md)).
+
 ## When the report asks for a feature the app does not have
 
 A report can be a request: "can one service sit in two categories?" Nothing went wrong and there is nothing
@@ -274,5 +292,7 @@ each is answered.
 - [ ] Several defects in one report: a row, a cause and a guard each, answered in the reporter's order
 - [ ] If a teammate already answered: every claim of their reply checked, the rule's enforcing layer read,
       and nothing posted while it waits on the reporter
+- [ ] Open reports from the same tenant read for the cause just found; a promise in an older thread kept or
+      carried into its reply
 - [ ] If a teammate built it: the commit read at its hash, each question answered with its line, their checks
       re-run, every output followed back through the inbound paths, and the answers kept off the reply prefix

@@ -285,6 +285,12 @@ file under the watcher), and touching the file may not wake it. Render the suspe
 one request, compare it with the source, and when they differ ask the user before restarting their dev
 server. Remove the probe afterwards.
 
+The local stack may be down or behind the code: the container runtime stopped, the local database missing
+the latest migrations. Start it, and apply the pending migrations to the local database only (for Supabase,
+`supabase migration up --local`) before seeding; a screen read on a schema behind the code fails in ways that
+look like the defect. A deep link that should open the record may be consumed before the screen has loaded;
+click the record on the screen rather than debugging the link, which is not the report.
+
 Before reading any screen, confirm the server on the port is this repository's: `lsof -p <pid> | grep cwd`
 for the process `lsof -iTCP:<port> -sTCP:LISTEN` names. A dev server of another project on the expected
 port answers every path with a redirect and a 404, which reads like a routing defect in the host. Start this
@@ -489,7 +495,8 @@ seeds on top of them. Clear the jobs a seed's triggers enqueued along with the r
 - [ ] Whole suite and linter green before every push; a failure that also fails on the old code named, not
       fixed
 - [ ] A migration that rewrites rows proven in a rolled-back transaction, then applied without a reset
-- [ ] The server on the port is this repository's; a new file format parsed by an independent library
+- [ ] The server on the port is this repository's, the local stack up and on the latest migrations; a new
+      file format parsed by an independent library
 - [ ] A money path reproduced through the screen with its defaults; every table it wrote listed and undone,
       updated rows restored from the snapshot
 - [ ] Two changes sharing files split into two commits, the first proven alone with the second stashed

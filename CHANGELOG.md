@@ -6,6 +6,31 @@ All notable changes to this skill are documented here. The format follows
 
 ## [Unreleased]
 
+From an eleventh recorded session: a voucher found by its old number on the list and not at the payment
+screen, fixed, merged, and an older report from the same member found to share the cause.
+
+### Added
+
+- Two lookups of one record that disagree, as a confirmed cause with a detail section in
+  `references/root-causes.md`: compare both predicates, match the old identifier whole after the current
+  key, refuse ambiguity, sweep every other lookup.
+- Reading the shape of a free-text field and who the workaround reaches, in `references/evidence.md`.
+- An older report with the same cause, in `references/intake.md`, and its row in the closing table of
+  `references/reply.md`.
+- A local stack that is down or behind the migrations, and a deep link that opens nothing, in
+  `references/fix-and-verify.md`.
+- Provenance entries 41 to 45, 73, 74 and 85.
+
+### Changed
+
+- Provenance entries 41 to 82 are renumbered 46 to 84 to make room; the ledger has 85 entries.
+
+### Fixed
+
+- The query wrapper in `references/evidence.md` decodes only the first JSON value, so output the CLI prints
+  after the envelope no longer fails every query with "Extra data"; a helper function denied to the query
+  tool's role is rewritten with built-ins.
+
 ## [0.3.0] - 2026-11-11
 
 Three more recorded sessions: the flow now reviews a teammate's build or reply before the reporter is

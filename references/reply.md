@@ -294,10 +294,13 @@ its age:
 | A commit that references it reached the default branch, the production deploy succeeded, the reply was sent | Yes, even when the reply said "after the next update": that update is now live |
 | A how-to or setup reply with nothing left on the team's side | Yes |
 | The reply asked the reporter for something (a code, an example) and no answer came | No |
+| The same cause as a report just fixed, and the earlier reply promised a correction only the reporter's answer allows | No: reply with the cause and the one thing still needed, and keep it open |
 | Noted for later, or no reply at all | No |
 | A report outside the bridge (a website task, a tester's issue) | Leave it to its owner |
 
-Report what was closed and why each other one stays open.
+Report what was closed and why each other one stays open. A commit's closing keyword closes its own issue
+when the merge reaches the default branch; confirm it closed (`gh issue view <number> --json state`) rather
+than closing it again by hand.
 
 ## After posting
 

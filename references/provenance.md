@@ -1,7 +1,7 @@
 # Provenance
 
 The flow was written by the engineer who runs the reporting bridge of a multi-tenant booking product, from
-ten recorded sessions on tenant reports. The first two arrived as an issue with a title and no description;
+eleven recorded sessions on tenant reports. The first two arrived as an issue with a title and no description;
 the first ended in a corrected read, the second in new behaviour the user chose. The third asked for a
 calendar capability the app already had, was answered with a how-to, and ended in a defect found while
 checking that answer, a fix, and a correction to the reporter. The fourth asked for a feature the app did not
@@ -18,9 +18,11 @@ tester filed by hand, with no bridge: two defects on one screen, a plan limit sh
 shown where a name belonged, settled from the platform's request log, merged, and answered with a memo that
 left the issue open for the tester. The tenth answered five requests from one member: a reply a teammate
 had already given was checked and left to wait, three features were built from what the timeline showed the
-member doing by hand, and the readers of one of them found a row that had never shown anything. Each fix ended
-in a reproduction on the old and new code.
-This ledger has 77 entries: what the sessions corrected in the flow, what they kept that looks odd, and what
+member doing by hand, and the readers of one of them found a row that had never shown anything. The eleventh
+fixed a voucher found by its old number on the list and not at the payment screen, and found that an older
+report from the same member, still waiting on her answer, had the same cause. Each fix ended in a reproduction
+on the old and new code.
+This ledger has 85 entries: what the sessions corrected in the flow, what they kept that looks odd, and what
 the skill adds that no session ran.
 
 ## Fixed in the flow
@@ -332,26 +334,65 @@ article's word limit was passed by a new sentence. The full suite caught both be
 back to the form the guard scans for, and the sentence was cut. **Shipped:** the guard paragraph in
 [fix-and-verify.md](fix-and-verify.md).
 
+### 41. The query wrapper failed on what the CLI printed after the envelope
+
+The wrapper the skill shipped read everything after the first brace with `json.loads`. The CLI printed an
+update notice after the envelope, merged in by `2>&1`, and every query failed with "Extra data" until the
+wrapper decoded only the first JSON value. **Shipped:** the `raw_decode` wrapper and its paragraph in
+[evidence.md](evidence.md).
+
+### 42. A search helper was denied to the query tool
+
+A query that reused the app's accent-folding search function answered "permission denied for function": the
+query tool runs as a role the app's grants do not cover. The same condition written with `ilike` ran.
+**Shipped:** the role paragraph under *Introspect first* in [evidence.md](evidence.md).
+
+### 43. "Found here, not there" was settled by two predicates and one record
+
+The title said a voucher was found by its number on the list and not at the payment screen. The list's
+search read parts of the code and the notes; the payment lookup matched the full current code alone. The
+reporter's last write before filing, a payment drawn from a voucher a minute earlier, named the record, and
+its notes held the number from the system it was imported from. The shape query showed every voucher of the
+tenant held such a number, and almost none had a client the screen's shortcut could offer. The fix matched
+the old number as a fallback, and the sweep added it to the global search, which had the same gap.
+**Shipped:** the root-cause row and its detail section in [root-causes.md](root-causes.md), the shape query
+in [evidence.md](evidence.md).
+
+### 44. An older report waiting on the reporter had the same cause
+
+Asked to close the resolved issues after the merge, the run found a report from the same member a week
+earlier: "the voucher code does not exist", answered with a request for the code and a promise to correct the
+visit. Its timeline fit the cause just fixed. The user confirmed it was the same issue; it was answered with
+the cause and the new way in, and kept open for the one record the promise needs. **Shipped:** the
+older-report section in [intake.md](intake.md) and its row in the closing table of [reply.md](reply.md).
+
+### 45. The local stack was down and behind the migrations
+
+The repro found the container runtime stopped and, once started, the local database one migration behind the
+code. Both were brought up before seeding, the pending migration applied locally only. A deep link meant to
+open the visit did nothing, and clicking the visit on the screen went around it. **Shipped:** the local-stack
+paragraph in [fix-and-verify.md](fix-and-verify.md).
+
 ## Kept deliberately
 
-### 41. Ask before fixing the likely causes
+### 46. Ask before fixing the likely causes
 
 The session had three plausible hypotheses before any data, and each was cheap to change. None was the cause.
 Fixing them blind would have shipped three changes and left the bug. The skill keeps the question to the user
 even when a blind fix looks harmless.
 
-### 42. A source guard rather than a loader test
+### 47. A source guard rather than a loader test
 
 The guard reads source files and matches a pattern, which looks crude next to a unit test of the loader. A
 loader test needs a mocked client chain and covers one loader; the guard covers every current and future read
 on the table and failed on all four defective reads at once. It stays.
 
-### 43. One read scoped instead of paged
+### 48. One read scoped instead of paged
 
 The assistant tool needed one service's assignments and read the whole table. It was narrowed to that service
 rather than paged: fewer rows, one request, and the guard accepts a read filtered to one record.
 
-### 44. The user chose the design of a behaviour fix
+### 49. The user chose the design of a behaviour fix
 
 In the second session the evidence showed a payment screen working as built, one visit per receipt, and a
 tenant settling two back-to-back treatments on two receipts. Four variants were put to the user: change the
@@ -360,14 +401,14 @@ missing relation through the integration. The user picked the first. The skill k
 even when one variant is clearly recommended. **Shipped:** "When the cause is behaviour, not a defect" in
 [intake.md](intake.md) and the two causes it confirmed in [root-causes.md](root-causes.md).
 
-### 45. A pure module instead of a guard for new behaviour
+### 50. A pure module instead of a guard for new behaviour
 
 The second fix had no repeated pattern for a source guard to hold. The rules (which visits join, which may)
 went into a pure module with unit tests, and the server action calls it. A test of a module that did not exist
 fails on the old code trivially, so the running app carries the fail-then-pass proof. **Shipped:** "When the
 fix is new behaviour" in [fix-and-verify.md](fix-and-verify.md).
 
-### 46. A how-to went out without reading production
+### 51. A how-to went out without reading production
 
 In the third session the code at the reported version already had every entry point and edge the reporter
 asked for, and the report was filed through the assistant from an unrelated page. The user chose a how-to
@@ -375,7 +416,7 @@ reply over a production read. The skill keeps that option first when the capabil
 would have told whether anyone had tried the feature, not whether it existed. **Shipped:** "When the app
 already does what the reporter asks" in [intake.md](intake.md).
 
-### 47. The user's trade-off went out as the user's
+### 52. The user's trade-off went out as the user's
 
 While the reply was being drafted the user added that the feature would mean removing the commission rules
 set per category. The code cannot prove a product decision. The reply carried it in the words of the screen,
@@ -383,7 +424,7 @@ with the rule type's label checked in the source, and the report back to the use
 theirs. The skill keeps that split rather than tracing a consequence the code does not decide.
 **Shipped:** the claim-check row in [reply.md](reply.md).
 
-### 48. A defect inside a request was fixed under `Refs`
+### 53. A defect inside a request was fixed under `Refs`
 
 A request for finer date filters in the reports was noted for after the freeze. Reading its screen found the
 export sending none of the period on screen, so most datasets exported the last 30 days whatever month was
@@ -392,78 +433,78 @@ issue was labelled and stayed open. **Shipped:** the screen-defect step in [inta
 control-ignores-state row in [root-causes.md](root-causes.md), and the `Refs #N` line in
 [fix-and-verify.md](fix-and-verify.md).
 
-### 49. A sibling that looked the same was left out
+### 54. A sibling that looked the same was left out
 
 The vouchers list had a date filter and an export that ignored it too. The list filtered by expiry date and
 the export bounded the issue date, so passing the filter through would have exported a different set than the
 one on screen. It stayed out of the change and the user was asked which date should win. **Shipped:** the
 different-field row in the sweep table in [fix-and-verify.md](fix-and-verify.md).
 
-### 50. A cap written on purpose was treated as the defect
+### 55. A cap written on purpose was treated as the defect
 
 One picker read clients with `.limit(500)` in name order, with a comment calling it a convenience. Cut in name
 order, it hid exactly the people the screen was for, so it was paged with the rest and the comment rewritten.
 **Shipped:** the cap-on-purpose row in the sweep table in [fix-and-verify.md](fix-and-verify.md).
 
-### 51. Tests that encoded the old behaviour were rewritten
+### 56. Tests that encoded the old behaviour were rewritten
 
 The column fix made two existing grid tests fail: their fixture had a non-treatment person holding a visit and
 expected the column hidden. Their expectations were changed, not the fixture, and the commit and the report
 named them. **Shipped:** the paragraph and the checklist line in [fix-and-verify.md](fix-and-verify.md).
 
-### 52. A bare "push" was asked about before merging
+### 57. A bare "push" was asked about before merging
 
 After both fixes were pushed to the preview branch the user typed "push". Nothing was left to push; the only
 step left was merging into the default branch, which deploys to production. The session listed the two commits
 it would ship and asked; the user then asked for the merge. **Shipped:** the merge line in
 [fix-and-verify.md](fix-and-verify.md).
 
-### 53. A refused grant was hidden, not made to work
+### 58. A refused grant was hidden, not made to work
 
 The user was offered three shapes: hide the grants the database refuses, the same plus a migration letting
 one table's policies read the overrides, or teach every policy the overrides. The first shipped. The skill
 keeps the choice with the user and the smallest shape first: the third touches money tables during a freeze.
 **Shipped:** the matrix row in [fix-and-verify.md](fix-and-verify.md).
 
-### 54. The admin's own switch was answered, not reverted
+### 59. The admin's own switch was answered, not reverted
 
 The admin asked that reception get full access to vouchers, then switched the till permissions off on two
 reception cards, which took vouchers away with them. The reply named the two cards and how to switch them
 back, and the labels were renamed to say what they cover. A separate voucher permission would be a new
 feature under the freeze. **Shipped:** the setup template and the naming rule in [reply.md](reply.md).
 
-### 55. One cause, one reply per report
+### 60. One cause, one reply per report
 
 Four reports shared one setup. Each got its own reply in its own thread, and each led to a different defect:
 refused grants, a misleading label, an uncapped list, a calendar with no read-only mode. The skill keeps one
 reply per report even when one answer would cover them. **Shipped:** the paragraph in
 [intake.md](intake.md).
 
-### 56. The live policies were read, not reconstructed
+### 61. The live policies were read, not reconstructed
 
 Which roles may write each table came from `pg_policies` on production, read only, rather than from the
 migration history. The guard test then holds the same list against the local database. **Shipped:** the
 policy read in [evidence.md](evidence.md).
 
-### 57. The variant changed mid-work, and everything followed
+### 62. The variant changed mid-work, and everything followed
 
 The user picked a how-to with a small improvement, then wrote "after all, give it its own tab" while the repro
 ran. The tab replaced the move everywhere: code, help text, the repro script and the reply. **Shipped:** the
 mid-work paragraph in [intake.md](intake.md).
 
-### 58. The full build's product questions went in one batch
+### 63. The full build's product questions went in one batch
 
 The user chose the full build of an add-on library during a freeze. Three questions only the user could
 answer (the commission fallback, merging identical add-ons, where the console offers them) went in one
 question with recommendations, before the migration was written. **Shipped:** the full-build paragraph in
 [intake.md](intake.md).
 
-### 59. A failing test that also failed on the old code was left alone
+### 64. A failing test that also failed on the old code was left alone
 
 A list-scroll test failed after the tab change. Run on the old code it failed the same way; the report named
 it and the fix did not touch it. **Shipped:** the whole-suite line in [fix-and-verify.md](fix-and-verify.md).
 
-### 60. A data migration and the seed were proven in rolled-back transactions
+### 65. A data migration and the seed were proven in rolled-back transactions
 
 The library migration merges identical add-ons and repoints visit lines. Its merge step ran on synthetic
 copies inside a transaction that was rolled back; the whole file then ran with the non-destructive command
@@ -471,108 +512,127 @@ over local data. A database reset that would have run the new seed was refused b
 the seed's changed section ran in a rolled-back transaction instead. **Shipped:** the data-migration paragraph
 in [fix-and-verify.md](fix-and-verify.md).
 
-### 61. The reply waited for the deploy, even when asked for all at once
+### 66. The reply waited for the deploy, even when asked for all at once
 
 Asked to post the review and the reply, merge, push and close in one message, the run merged and pushed
 first, waited for the production deploy to report success, and only then wrote "available now". A reply
 posted in the order the user listed would have told the reporter about a button that was not there yet.
 **Shipped:** the merge-in-the-same-run section in [reply.md](reply.md).
 
-### 62. The issue was closed before the reporter confirmed
+### 67. The issue was closed before the reporter confirmed
 
 The reply asked the reporter to confirm, and the user closed the issue anyway. That was kept as the user's
 call: the bridge mirrors later comments, and the report back said the issue may need reopening.
 
-### 63. An independent parser stood in for the consumer apps
+### 68. An independent parser stood in for the consumer apps
 
 The exported file was parsed with a separate iCalendar library: lines within 75 octets, no fold inside a
 multibyte letter, escaped commas and semicolons round-tripping. That proves the format and nothing about
 Google, Apple or Outlook, which nobody had opened; the report and the review comment both said so.
 
-### 64. The plan limit itself was left alone
+### 69. The plan limit itself was left alone
 
 The refusal was right: the plan includes one location. The fix changed what the dialog says and nothing
 about the limit, and the memo told the tester the ways out the product already offers (archive one, upgrade,
 an add-on). Raising a limit is a commercial setting the operator owns.
 
-### 65. A teammate's reply was checked, not replaced
+### 70. A teammate's reply was checked, not replaced
 
 A request already had a teammate's "noted for later" reply with a question to the reporter. Every claim in it
 was checked against the code, and the rule it stated was found held in the database function as well as on
 the screen. Nothing was posted: the run recommended waiting for the reporter, and the user agreed.
 **Shipped:** the already-answered section in [intake.md](intake.md).
 
-### 66. Only issues whose fix was live were closed
+### 71. Only issues whose fix was live were closed
 
 Asked to close the resolved issues, the run closed a setup how-to and a request whose `Refs` commit had since
 reached production, and left open the ones waiting on the reporter or never answered. **Shipped:** the closing
 table in [reply.md](reply.md).
 
-### 67. The cleanup undid a payment by listing what it wrote
+### 72. The cleanup undid a payment by listing what it wrote
 
 Two repros took real payments on the local database. Each was undone by listing every table that gained rows
 since a noted time and deleting them in one transaction, with updated rows restored from a snapshot and from
 the audit rows' old values, rather than by a reset that would also wipe other local data. **Shipped:** the
 cleanup query in [fix-and-verify.md](fix-and-verify.md).
 
+### 73. The fallback matches whole, after the current code
+
+The list's search matches parts of a code and any word of the notes, and copying it into the payment lookup
+would have closed the report in one line. The lookup instead takes the token after the old system's name,
+compares it whole, tries it only when no current code matches, and refuses when two records answer. A part
+of a number or a word in the notes picking a voucher at the counter draws money from the wrong card.
+
+### 74. The older report stayed open after its reply
+
+Its cause was fixed and live, and closing it would have tidied the list. Its earlier reply had promised to
+correct one visit once the voucher was known, the data could not name the voucher among many of the same
+value, and the app refuses that correction to the tenant. It stays open until the reporter answers.
+
 ## Added
 
-### 68. Not run in any recorded session
+### 75. Not run in any recorded session
 
 The root-cause rows for stale cache and time zone, the alternatives in the seam table (Linear, Jira, `psql` on
 a replica, an admin API), the reply template for asking the reporter (every session read production or the
 code instead), the "route to another screen" and "fix it upstream" variants, and the vocabulary table were
 written for this skill and have not run as part of the flow.
 
-### 69. The reply template after a behaviour change is a generalisation
+### 76. The reply template after a behaviour change is a generalisation
 
 The second session's reply described the new behaviour and how to opt out of it; the template in
 [reply.md](reply.md) generalises that one reply and has not been used as a template yet.
 
-### 70. The how-to and correction templates, and the loader repro, are generalisations
+### 77. The how-to and correction templates, and the loader repro, are generalisations
 
 The how-to and correction templates in [reply.md](reply.md) each generalise one reply from the third session.
 The throwaway loader test in [fix-and-verify.md](fix-and-verify.md) uses placeholder names for the host's
 loader and seed helpers; the run it describes used the host's own.
 
-### 71. The feature-request variants and template are a generalisation
+### 78. The feature-request variants and template are a generalisation
 
 The template "when the feature is not built now" in [reply.md](reply.md) generalises one reply from the fourth
 session. The narrow and full build variants in [intake.md](intake.md) were put to the user and not built; the
 commercial-terms seam has values from one host only. Reading earlier replies for the house tone ran once.
 
-### 72. The sixth session's shapes are generalisations
+### 79. The sixth session's shapes are generalisations
 
 The setup template in [reply.md](reply.md) generalises three replies from one session. `ID_CHUNK` of 200 is
 one host's value. The policy probe assumes a tenant column on every probed table and a no-op update with no
 trigger side effects. The list of read-only entry points comes from one calendar.
 
-### 73. The feature-built template is a generalisation
+### 80. The feature-built template is a generalisation
 
 The template "after a requested feature is built" in [reply.md](reply.md) generalises one reply from the
 seventh session. The fallback rule it shows (an add-on follows a percentage service rate, not a fixed amount)
 was one user's decision.
 
-### 74. The choice still goes in the report when the run may not ask
+### 81. The choice still goes in the report when the run may not ask
 
 The paragraph in [intake.md](intake.md) and the clause in the quick start come from the agent eval of 0.2.0,
 not from a recorded session. Told to work unattended, one agent listed what it would need and never laid out
 the three options. No session has run the unattended case with a real report.
 
-### 75. The review table and the deploy status command are generalisations
+### 82. The review table and the deploy status command are generalisations
 
 The review table in [intake.md](intake.md) generalises one review of one build. The deploy status command in
 [reply.md](reply.md) is written for GitHub deployments; the eighth session queried the same API, and other
 hosts report deploys elsewhere.
 
-### 76. The request-log patterns beyond the refusal are a generalisation
+### 83. The request-log patterns beyond the refusal are a generalisation
 
 The ninth session saw one pattern in the request log, the same `402` on every attempt. The rows for a `5xx`,
 for no request at all and for one success among failures, and the other platforms' logs in the seam table,
 were written for this skill and have not run.
 
-### 77. The tenth session's shapes are generalisations
+### 84. The tenth session's shapes are generalisations
 
 The cleanup query assumes every table carries `created_at`; a table without one is missed and has to be read
 by hand. The blob-staging split ran once, on two files. The closing table generalises one request to close a
 batch, on one tracker.
+
+### 85. The disagreeing lookups beyond the till are a generalisation
+
+The session saw one pair: a list search and a payment lookup of vouchers, with the old number in the notes.
+The row's wording for forms and public balance checks, and the detail table's question about other paths,
+generalise that pair.
